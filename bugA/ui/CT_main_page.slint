@@ -194,7 +194,7 @@ export component CT_tablePage inherits Page {
 export component CT_mainPage inherits Page {
     title:"Main View";
 
-    //in-out property <image> previewPlot <=>_plot_preview.source;
+    in-out property <image> previewPlot <=>_plot_preview.source;
     background:Theme.palette.custom-page-background;
     connectState : CT_mainPageAdapter.currentConnect;
 
@@ -332,7 +332,7 @@ export component CT_mainPage inherits Page {
                 background: Theme.palette.foreground_disabled;
                 
             }
-            _plot_preview:=PlotArea{
+            _plot_preview:=Image{
                 //preferred-width: 200px;
                 //preferred-height: 100px;
                 //source: PlotterPageAdapter.render_plot(PlotterPageAdapter.xMiddle, PlotterPageAdapter.yMiddle); 

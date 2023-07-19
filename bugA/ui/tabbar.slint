@@ -236,7 +236,7 @@ export component custom_TabBar inherits rootPage {
             clip: true;
             
             CT_mainPage {
-                //previewPlot:PlotterPageAdapter.render_plot(PlotterPageAdapter.xMiddle, PlotterPageAdapter.yMiddle);
+                previewPlot:PlotterPageAdapter.render_plot(PlotterPageAdapter.xMiddle, PlotterPageAdapter.yMiddle);
                 ifDeviceName:true;
                 deviceName:root.deviceNameTab;
                 x: root.active-tab == 0 ? 0 : root.active-tab < 0 ? - self.width - 1px : parent.width + 1px;
