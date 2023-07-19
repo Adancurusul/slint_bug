@@ -20,4 +20,4 @@ The solution to the above problem can be seen in the commit
 
 
 ## Question
-in ```temp-display.slint[59]:               if(side-bar.current-item == 3) : PlotArea{}``` Displaying images of plotters does not cause the above bugs.
+in ```temp-display.slint[51]:               if(side-bar.current-item == 3) : PlotArea{}``` Displaying images of plotters does not cause the above bugs.
