@@ -1,0 +1,75 @@
+// SPDX-FileCopyrightText: 2022 Florian Blasius <co_sl@tutanota.com>
+// SPDX-License-Identifier: MIT
+
+// workaround to get font displayed embedded on the softwarerendrer
+// import "../assets/fonts/Roboto-Regular.ttf"; 
+// import "../assets/fonts/Roboto-Medium.ttf"; 
+
+import { Font } from "ui/custom_widgets/typo.slint";
+import { Theme } from "ui/theme.slint";
+
+// `BaseLabel` represents the base for `Theme` labels. Set font settings by font property.
+export component BaseLabel inherits Text {
+    // Defines the font settings.
+    in property <Font> font;
+
+    color: Theme.palette.foreground;
+    // font_family: font.family;
+    font_size: root.font.size;
+    font_weight: root.font.weight;
+}
+
+// `SmallLabel` is a label with settings `Theme.typo.small_label`.
+export component SmallLabel inherits Text {
+    // font: Theme.typo.small_label;
+    color: Theme.palette.foreground;
+    font_size: 12px;
+    font_weight: 400;
+}
+
+// `MediumLabel` is a label with settings `Theme.typo.medium_label`.
+export component MediumLabel inherits Text {
+    // font: Theme.typo.medium_label;
+    color: Theme.palette.foreground;
+    font_size: 12px;
+    font_weight: 500;
+}
+
+// `LargeLabel` is a label with settings `Theme.typo.large_label.
+export component LargeLabel inherits Text {
+    color: Theme.palette.foreground;
+    font_size: 14px;
+    font_weight: 500;
+}
+
+// `ErrorLabel` is a `ErrorLabel` displayed with error text color.
+export component ErrorLabel inherits Text {
+    // font: Theme.typo.small_label;
+    font_size: 12px;
+    font_weight: 400;
+    color: Theme.palette.error;
+}
+
+
+// `SmallTitle` is a label with settings `Theme.typo.small_title`.
+export component SmallTitle inherits Text {
+    // font: Theme.typo.small_title;
+    color: Theme.palette.foreground;
+    font_size: 16px;
+    font_weight: 500;
+}
+
+// `MediumTitle` is a label with settings `Theme.typo.medium_title`.
+export component MediumTitle inherits Text {
+    // font: Theme.typo.medium_title;
+    color: Theme.palette.foreground;
+    font_size: 20px;
+    font_weight: 500;
+}
+
+// `LargeTitle` is a label with settings `Theme.typo.large_title.
+export component LargeTitle inherits Text {
+    color: Theme.palette.foreground;
+    font_size: 24px;
+    font_weight: 500;
+}

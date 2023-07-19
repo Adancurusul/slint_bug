@@ -1,0 +1,127 @@
+
+
+// Copyright © SixtyFPS GmbH <info@slint-ui.com>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-commercial
+import {Theme} from "ui/theme.slint";
+import { Slider, GroupBox, HorizontalBox, VerticalBox } from "std-widgets.slint";
+import { Page } from "page.slint";
+import {custom_VSlider,custom_HSlider} from "./custom_widgets/custom_slider.slint";
+
+export global PlotterPageAdapter {
+    pure callback render_plot(float /* pitch */, float /* yaw */) -> image;
+    in-out property <float> pitch: 0.15;
+    in-out property <float> yaw: 0.5;
+    in-out property <float> xMiddle: 3;
+    in-out property <float> yMiddle: 37;
+    in-out property <float> xMax: 10;
+    in-out property <float> yMax: 10;
+    in-out property <float> scale_x: 10;
+    in-out property <float> scale_y: 10;
+    in-out property <string> currentTemprature;
+}
+
+export component PlotArea inherits Image{
+    //preferred-width: 800px;
+    //preferred-height: 400px;
+    //width:2 * self.height;
+    source: PlotterPageAdapter.render_plot(PlotterPageAdapter.xMiddle, PlotterPageAdapter.yMiddle); 
+    touch := TouchArea {
+        property <float> pressed-pitch;
+        property <float> pressed-yaw;
+        property <float> pressed-xMiddle;
+        property <float> pressed-yMiddle;
+        pointer-event(event) => {
+            if (event.button == PointerEventButton.left && event.kind == PointerEventKind.down) {
+                self.pressed-xMiddle = PlotterPageAdapter.xMiddle;
+                self.pressed-yMiddle = PlotterPageAdapter.yMiddle;
+            }
+        }
+        
+        moved => {
+            if (self.enabled && self.pressed) {
+                PlotterPageAdapter.xMiddle =round( self.pressed-xMiddle - (touch.mouse-x - touch.pressed-x)/ self.width *50);
+                PlotterPageAdapter.yMiddle =round( self.pressed-yMiddle + (touch.mouse-y - touch.pressed-y)/ self.height *10);
+                
+            
+            }
+        }
+        
+        mouse-cursor: self.pressed ? MouseCursor.grabbing : MouseCursor.grab;
+    }
+} 
+
+
+export component PlotterPage inherits Page {
+    title: "Temperature Plot View";
+    preferred-width: 800px;
+    preferred-height: 400px;
+    
+    background:Theme.palette.custom-page-background;
+    //pure callback render_plot(float /* pitch */, float /* yaw */) -> image;
+
+    
+    VerticalBox {
+        HorizontalBox {
+            alignment: center;
+            Text {
+                font-size: 20px;
+                text: "Current Temperature : ";
+                horizontal-alignment: center;
+            }
+            Text {
+                font-size: 20px;
+                text: PlotterPageAdapter.currentTemprature;
+                horizontal-alignment: center;
+            }
+            Text {
+                font-size: 20px;
+                text: "℃";
+                horizontal-alignment: center;
+            }
+
+        }
+        
+        HorizontalBox{
+
+
+            VerticalBox {
+                PlotArea {
+                    
+                }
+                //Text {
+                //    text: "X aixs:";
+                //    font-weight: 600;
+                //    vertical-alignment: center;
+                //}
+                amplitude-slider := custom_VSlider {
+                    minimum: 0;
+                    maximum: 100;
+                    value: 50;
+                    onValueChanged=> {
+                        PlotterPageAdapter.scale_x =  round(self.value);
+                    }
+                }
+            }
+            
+            
+                
+                slider-2 := custom_HSlider {
+                    minimum: 0;
+                    maximum: 100;
+                    value: 50;
+                    onValueChanged=> {
+                        PlotterPageAdapter.scale_y = round(self.value);
+                    }
+                }
+            
+        }
+        
+
+ 
+        
+        
+        
+    }
+}
+
+

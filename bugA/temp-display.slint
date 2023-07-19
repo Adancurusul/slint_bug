@@ -1,0 +1,126 @@
+// Copyright © SixtyFPS GmbH <info@slint-ui.com>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-commercial
+import {Theme,Icon,Icons} from "ui/theme.slint";
+import { CheckBox, StandardListView, StyleMetrics, Button } from "std-widgets.slint";
+import { SavePageAdapter ,SavePage, 
+    ControlsPage,TableViewPage,
+     TableViewPageAdapter 
+    ,PlotterPage
+    ,PlotterPageAdapter,PlotArea} from "ui/pages.slint";
+import { PageSettings } from "ui/page_settings.slint";
+import { SideBar ,LeftSideBarAdapter} from "ui/sidebar.slint";
+import {custom_TabBar} from "ui/tabbar.slint";
+import {sideBar_right} from "ui/sidebar_hide.slint";
+import {custom_roundButton} from "ui/custom_widgets/custom_roundButton.slint";
+//export { TableViewPageAdapter ,PlotterPage}
+import {custom_scrollView} from "ui/custom_widgets/custom_scrollView.slint";
+//import {CT_mainPageAdapter} from "ui/CT_main_page.slint";
+import {CT_mainPageAdapter} from "MainAdapter.slint";
+export { PlotterPageAdapter,LeftSideBarAdapter,SavePageAdapter,CT_mainPageAdapter}
+
+
+
+export component App inherits Window {
+    //width: 800px;
+    //height: 600px;
+    preferred-width: 1000px;
+    preferred-height: 800px;
+    title: "VitalSignsMonitor";
+    background:Theme.palette.custom-tab-background;
+    icon: Theme.images.logo;
+    in-out property <string> DTCTName <=>LeftSideBarAdapter.deviceCT ;// _DTCT_page.deviceName;
+    in-out property <string> DTCHName <=> LeftSideBarAdapter.deviceCH ;
+    //@image-url("logo/slint-logo-small-light-128x128.png");
+    in-out property <bool> cs<=> LeftSideBarAdapter.connectState;
+    
+    main_area := Rectangle {
+        //min-height:600px;
+        //min-width:800px;
+        
+        HorizontalLayout {  
+            side-bar := SideBar {  
+                title: "VitalSignsMonitor";
+                model: ["Home", "Thermometer", "Heart Rate Monitor","Cached  Data","About"];
+                iconList:[Icons.fa_var_home,Icons.fa_var_fire,Icons.fa_var_heartbeat,Icons.fa_var_files_o,Icons.fa_var_at];
+                
+            }
+            _middle_area := Rectangle {
+                if(side-bar.current-item == 0) : Rectangle{ PlotterPage {ifTitle : true;}}
+                if(side-bar.current-item == 1) : _DTCT_page:=custom_TabBar {ifTitle : false; deviceNameTab:root.DTCTName;}
+                if(side-bar.current-item == 2) : TableViewPage {}
+                if(side-bar.current-item == 3) : PlotArea{}//PlotterPage {ifTitle : false;}
+                if(side-bar.current-item == 4) : TableViewPage{}//Image{width:root.width/4;height:root.width/4;source:Theme.images.KuninIconPng;}//PlotterPage {ifTitle : false;}
+            }
+                
+            
+            /*
+            side-bar := SideBar {  
+                title: "Slint Widgets Gallery";
+                model: ["Controls", "TableView", "Plot"];
+            }
+    
+            if(side-bar.current-item == 0) : custom_TabBar {}
+            if(side-bar.current-item == 1) : TableViewPage {}
+            if(side-bar.current-item == 2) : PlotterPage {}
+    
+        }
+        
+        */
+        _right_sideBar := sideBar_right{
+            //width:0px;
+            reference-width:root.width/2;
+            background: _right_side_button.checked? Theme.palette.custom-tab-background.darker(0.5) : Theme.palette.custom-tab-background;
+            border-radius: 5px;
+            border-width: 1px;
+            border-color: self.background.darker(10%) ;
+            animate background {
+                //delay:Theme.durations.slow;
+                duration: Theme.durations.slow;
+                
+            }
+            SavePage{
+
+            }
+            //Button {
+            //    text: "More Info";  
+            //  }
+        
+        }
+            
+        }
+        _right_side_button:=custom_roundButton{
+            property<length> pressed_x;
+            property<length> pressed_y;
+            //icon: _right_sideBar.background==Theme.palette.custom-tab-background ? Theme.images.saveIcon:Theme.images.rightArrowIcon;
+            icon : Theme.images.saveIcon;
+            height: 40px;
+            width: 40px;
+            checkable:true;
+            float_y:true;
+            x:  self.checked ? parent.width - self.width - _right_sideBar.reference-width/2  : 
+            _right_sideBar.background==Theme.palette.custom-tab-background ? self.has-hover ? parent.width - self.width : parent.width - self.width + 20px 
+            : parent.width - self.width + 20px;//收回的时候做个delay
+            y:  0px;// + self.height ;
+            
+            animate x, y {
+                duration: Theme.durations.slow;
+                easing: ease-in-out;
+            }
+            pressed =>{
+                pressed_x = self.x;
+                pressed_y = self.y;
+            }
+            float_move_y(yValue) =>{
+                self.y = pressed_y - yValue;
+            }
+            clicked =>{
+                _right_sideBar.expaned = !_right_sideBar.expaned;
+                //}
+               // debug(parent.height);
+            }
+        }
+        
+    }
+
+    
+}

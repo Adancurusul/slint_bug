@@ -1,0 +1,448 @@
+import {Theme,Icons,Icon} from "ui/theme.slint";
+import { Page } from "page.slint";
+import {Spacer ,HorizontalSpacerSmall, HorizontalSeparator,HorizontalSpacerLarge} from "ui/custom_widgets/custom_spacer.slint";
+import {Button ,RoundOutlineButton,RoundButton}from "ui/custom_widgets/custom_button.slint";
+import {MediumTitle,SmallTitle,SmallLabel,MediumLabel} from "ui/custom_widgets/custom_label.slint";
+import {TableView, Cell} from "ui/custom_widgets/custom_tableView.slint";
+import {ItemModel} from "ui/custom_widgets/custom_list.slint";
+import {PlotterPage,PlotArea,PlotterPageAdapter} from "ui/plotter.slint";
+import {custom_tableViewPaging } from "ui/custom_widgets/custom_tableViewPaging.slint";
+
+export global CT_mainPageAdapter {
+    in-out property <string> name ;
+    in-out property <string> _type:"V1.0";
+    in-out property <string> openTime;
+    in-out property <string> timeLeft;
+    in-out property <string> currentTemprature;
+    in-out property <string> currentTime;
+    in-out property <int> historyNum;
+    in-out property <int> historyDataIndex;
+    in-out property <bool> offlineRecord;
+    in-out property <bool> currentConnect  ;
+    in-out property <float> scale_y: 10;
+    in-out property <int> tableDataNum;
+    in-out property <int> currentHistoryNum;
+    in-out property <int> eachPageDataNum:10;
+    in-out property <[ItemModel]> histoyDataItems:[
+        {text:"2022.11.11-10:13:24"},
+        {text:"2022.11.11-10:13:24"},
+        {text:"2022.11.11-10:13:24"},
+        {text:"2022.11.11-10:13:24"},
+        {text:"2022.11.11-10:13:24"},
+    ];
+
+    in-out property <[[Cell]]> tableData ;
+    in-out property <[[Cell]]> historyPreviewData: [
+        [{ value: "1"}, { value: "2022.11.11-10:13:24" }, { value: "43" }],
+        [{ value: "2"}, { value: "2022.11.11-10:13:24" }, { value: "43" }],
+        [{ value: "3"}, { value: "2022.11.11-10:13:24" }, { value: "43" }],
+        [{ value: "4"}, { value: "2022.11.11-10:13:24" }, { value: "43" }],
+    ];
+    in-out property <[[Cell]]> showHistoryData;
+    pure callback onHistoryDataChanged(int);//history 索引
+    pure callback onTablePageChanged(int,int);//firstData ,lastData
+    pure callback onHistoryTablePageChanged(int,int);//firstData ,lastData
+    pure public function getPageData() -> [[Cell]]{
+        return tableData;
+    }
+}
+
+
+export component TableDataView inherits custom_tableViewPaging{
+   
+        //min-height:root.height/4;
+        background: Theme.palette.custom-tab-background;
+        border-radius: 5px;
+        border-width: 1px;
+        border-color: self.background.darker(10%) ;
+        currentPageRows <=> CT_mainPageAdapter.tableData;
+        totalLength : CT_mainPageAdapter.tableData.length;
+        private property <int> current_row: -1;
+        accepted(row, cell, text) => {
+            self.rows[self.row][cell].editable = false;
+            self.rows[self.row][cell].value = text;
+            self.current_row = -1;
+        }
+        onCurrentPageChanged(fir,las)=>{
+            CT_mainPageAdapter.onTablePageChanged(fir,las);
+        }
+        columns: [
+            { header: "Index", min_width: 35px },
+            { header: "| Time", horizontal_stretch: 1,min_width: 100px },
+            { header: "| Temprature", horizontal_stretch: 1,min_width: 35px },
+        ];
+        //rows: CT_mainPageAdapter.tableData;
+    
+    
+}
+
+
+
+export component CT_tablePage inherits Page {
+    connectState : CT_mainPageAdapter.currentConnect;
+    public function refresh() {
+        _table.currentPageRows = CT_mainPageAdapter.getPageData();
+        //debug("refresh");
+    }
+    title:"Table View";
+    //preferred-width: 800px;
+    //preferred-height: 400px;
+    //in-out property <image> previewPlot <=>_plot_preview.source;
+    background:Theme.palette.custom-page-background;
+    VerticalLayout{
+        //alignment:start;
+        VerticalLayout{
+            alignment:start;
+            _basic_data:=GridLayout{
+                padding: Theme.spaces.large;
+                spacing: Theme.spaces.medium;
+                Row{
+                    SmallLabel{
+                        text: "Name";
+                        color: Theme.palette.foreground_disabled;
+                    }
+                    Spacer{}
+                    SmallLabel{
+                        text: "Version";
+                        color: Theme.palette.foreground_disabled;
+                    }
+                    Spacer{}
+                    SmallLabel{
+                        text: "Current Record Time";
+                        color: Theme.palette.foreground_disabled;
+                    }
+                    Spacer{}
+                    SmallLabel{
+                        text: "Current Data Count";
+                        color: Theme.palette.foreground_disabled;
+                    }
+                    Spacer{}
+                }
+                Row {
+                    HorizontalSeparator {
+                        colspan: 8; 
+                        background: Theme.palette.foreground_disabled;
+                    }
+                }
+                Row{
+                    MediumLabel{
+                        text <=> CT_mainPageAdapter.name;
+                    }
+                    Spacer{}
+                    MediumLabel{
+                        text <=> CT_mainPageAdapter._type;
+                    }
+                    Spacer{}
+                    MediumLabel{
+                        text <=> CT_mainPageAdapter.currentTime;
+                    }
+                    Spacer{}
+                    MediumLabel{
+                        text : CT_mainPageAdapter.tableDataNum;
+                    }
+                    Spacer{}
+                }
+            }
+        }
+
+        VerticalLayout{
+    
+            padding: Theme.spaces.large;
+            spacing: Theme.spaces.medium;    
+            MediumTitle {
+                text: "Data Table";
+            }
+            HorizontalSeparator {
+                //colspan: 8; 
+                background: Theme.palette.foreground_disabled;
+                
+            }
+        _table := custom_tableViewPaging {
+            //min-height:root.height/4;
+            eachPageDataNum:CT_mainPageAdapter.eachPageDataNum;
+            background: Theme.palette.custom-tab-background;
+            border-radius: 5px;
+            border-width: 1px;
+            border-color: self.background.darker(10%) ;
+            currentPageRows <=> CT_mainPageAdapter.tableData;
+            totalLength : CT_mainPageAdapter.tableDataNum;
+            private property <int> current_row: -1;
+            accepted(row, cell, text) => {
+                self.rows[self.row][cell].editable = false;
+                self.rows[self.row][cell].value = text;
+                self.current_row = -1;
+            }
+            onCurrentPageChanged(fir,las)=>{
+                
+                CT_mainPageAdapter.onTablePageChanged(fir,las); 
+                root.refresh();
+            }
+            columns: [
+                { header: "Index", min_width: 35px },
+                { header: "| Time", horizontal_stretch: 1,min_width: 100px },
+                { header: "| Temprature", horizontal_stretch: 1,min_width: 35px },
+            ];
+            refresh=>{
+            }
+            //rows: CT_mainPageAdapter.tableData;
+        }
+        }
+    }
+}
+
+
+export component CT_mainPage inherits Page {
+    title:"Main View";
+
+    //in-out property <image> previewPlot <=>_plot_preview.source;
+    background:Theme.palette.custom-page-background;
+    connectState : CT_mainPageAdapter.currentConnect;
+
+    VerticalLayout{
+        alignment:start;
+    
+        _basic_data:=GridLayout{
+            padding: Theme.spaces.large;
+            spacing: Theme.spaces.medium;
+            Row {
+                MediumTitle {
+                    text: "Basic Data";
+                }
+            }
+            Row{
+                SmallLabel{
+                    text: "Name";
+                    color: Theme.palette.foreground_disabled;
+                }
+                Spacer{}
+                SmallLabel{
+                    text: "Version";
+                    color: Theme.palette.foreground_disabled;
+                }
+                Spacer{}
+                SmallLabel{
+                    text: "Time Since Opening";
+                    color: Theme.palette.foreground_disabled;
+                }
+                Spacer{}
+                SmallLabel{
+                    text: "Suggested Time of Use";
+                    color: Theme.palette.foreground_disabled;
+                }
+                Spacer{}
+            }
+            Row {
+                HorizontalSeparator {
+                    colspan: 8; 
+                    background: Theme.palette.foreground_disabled;
+                }
+            }
+            Row{
+                _bug_name_lable:=MediumLabel{
+                    //text: root.deviceName;//这里用下面那句无法切换，slintV1.0.0 bug
+                    text: CT_mainPageAdapter.name;
+                }
+                Spacer{}
+                MediumLabel{
+                    text: CT_mainPageAdapter._type;
+                }
+                Spacer{}
+                MediumLabel{
+                    text: CT_mainPageAdapter.openTime;
+                }
+                Spacer{}
+                MediumLabel{
+                    text: CT_mainPageAdapter.timeLeft;
+                }
+                Spacer{}
+            }
+            Row {
+                HorizontalSpacerSmall {
+                    colspan: 8; 
+                    //background: Theme.palette.foreground_disabled;
+                }
+            }
+            Row{
+                SmallLabel{
+                    text: "Current Record Time";
+                    color: Theme.palette.foreground_disabled;
+                    colspan: 2; 
+                }
+                Spacer{}
+                Spacer{}
+                SmallLabel{
+                    text: "History Data Number";
+                    color: Theme.palette.foreground_disabled;
+                    colspan: 2; 
+                }
+                Spacer{}
+                SmallLabel{
+                    text: "Off-line Recording ";
+                    color: Theme.palette.foreground_disabled;
+                    colspan: 2; 
+                }
+                //Spacer{}
+                //Spacer{}
+                //Spacer{}
+            }
+            Row {
+                HorizontalSeparator {
+                    colspan: 8; 
+                    background: Theme.palette.foreground_disabled;
+                    
+                }
+            }
+            Row{
+                MediumLabel{
+                    text <=> CT_mainPageAdapter.currentTime;
+                    colspan: 2; 
+                }
+                Spacer{}
+                Spacer{}
+            
+                MediumLabel{
+                    text: CT_mainPageAdapter.historyNum;
+                    colspan: 2; 
+                }
+                Spacer{}
+                MediumLabel{
+                    text: CT_mainPageAdapter.offlineRecord ? "Yes" : "No (V2.0 required)";
+                    colspan: 2; 
+                }
+                //Spacer{}
+                //Spacer{}
+                //Spacer{}
+            }
+        }
+    }
+
+
+
+    _preview_area:=HorizontalLayout{
+        VerticalLayout{
+            //col:0;
+            padding: Theme.spaces.large;
+            spacing: Theme.spaces.medium; 
+            alignment:start;   
+            MediumTitle {
+                text: "Plot Preview";
+            }
+            HorizontalSeparator {
+                //colspan: 8; 
+                background: Theme.palette.foreground_disabled;
+                
+            }
+            _plot_preview:=PlotArea{
+                //preferred-width: 200px;
+                //preferred-height: 100px;
+                //source: PlotterPageAdapter.render_plot(PlotterPageAdapter.xMiddle, PlotterPageAdapter.yMiddle); 
+                //rotation-angle:90deg;
+            }
+        }
+        VerticalLayout{
+            spacing: Theme.spaces.medium;
+            
+            _table_view:=VerticalLayout{
+                padding: Theme.spaces.large;
+                spacing: Theme.spaces.medium;    
+                MediumTitle {
+                    text: "Table Preview";
+                }
+                HorizontalSeparator {
+                    //colspan: 8; 
+                    background: Theme.palette.foreground_disabled;
+                    
+                }
+                //TableDataView{
+                
+                //preferred-height:root.height/4;
+                //}
+                
+                TableView {
+                 
+                    min-height:root.height/4;
+                    background: Theme.palette.custom-tab-background;
+                    border-radius: 5px;
+                    border-width: 1px;
+                    border-color: self.background.darker(10%) ;
+                    private property <int> current_row: -1;
+                    accepted(row, cell, text) => {
+                        self.rows[self.row][cell].editable = false;
+                        self.rows[self.row][cell].value = text;
+                        self.current_row = -1;
+                    }
+                    columns: [
+                        { header: "Index", min_width: 35px },
+                        { header: "| Time", horizontal_stretch: 1,min_width: 100px },
+                        { header: "| Temprature", horizontal_stretch: 1,min_width: 35px },
+                    ];
+                    rows: CT_mainPageAdapter.tableData;
+                }
+                
+            }
+            
+
+            _histroy_view:=VerticalLayout{
+                //col:1;
+                padding: Theme.spaces.large;
+                spacing: Theme.spaces.medium; 
+                MediumTitle {
+                    text: "History Preview";
+                }
+                HorizontalSeparator {
+                    //colspan: 8; 
+                    background: Theme.palette.foreground_disabled;
+                    
+                }
+                _history_table_preview:=TableView {
+                    min-height:root.height/9;
+                    background: Theme.palette.custom-tab-background;
+                    border-radius: 5px;
+                    border-width: 1px;
+                    border-color: self.background.darker(5%) ;
+                    private property <int> current_row: -1;
+                    accepted(row, cell, text) => {
+                        self.rows[self.row][cell].editable = false;
+                        self.rows[self.row][cell].value = text;
+                        self.current_row = -1;
+                    }
+                    columns: [
+                        { header: "Index", min_width: 35px },
+                        { header: "| Time",min_width: 100px },
+                        { header: "| Data Volume",min_width: 35px },
+                    ];
+                    rows: CT_mainPageAdapter.historyPreviewData;
+                }
+    
+            }
+        }
+    }
+    /*
+    GridLayout{
+        VerticalLayout{
+            col:0;
+            padding: Theme.spaces.large;
+            spacing: Theme.spaces.medium; 
+            alignment:start;   
+            MediumTitle {
+                text: "Plot Preview";
+            }
+            HorizontalSeparator {
+                //colspan: 8; 
+                background: Theme.palette.foreground_disabled;
+                
+            }
+            _plot_preview:=Image{
+                preferred-width: 200px;
+                preferred-height: 100px;
+                //source: PlotterPageAdapter.render_plot(PlotterPageAdapter.xMiddle, PlotterPageAdapter.yMiddle); 
+                //rotation-angle:90deg;
+            }
+        }
+        
+    }
+    */
+
+}
+
+

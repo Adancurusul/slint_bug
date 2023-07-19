@@ -1,0 +1,91 @@
+// Copyright © SixtyFPS GmbH <info@slint-ui.com>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-commercial
+import {Theme,Icon,Icons} from "ui/theme.slint";
+import { CheckBox, GridBox, ListView, ScrollView, VerticalBox } from "std-widgets.slint";
+import {Spacer ,HorizontalSpacerLarge, HorizontalSeparator} from "ui/custom_widgets/custom_spacer.slint";
+import {custom_scrollView} from "ui/custom_widgets/custom_scrollView.slint";
+import { PageSettings } from "page_settings.slint";
+export {Theme}
+
+
+export component rootPage inherits VerticalBox {
+    in property<string> title: "title";
+    in property<string> description: "description";
+    in-out property<bool> ifTitle : true ;
+
+    @children
+}
+
+export component Page inherits Rectangle{
+    in property<string> title: "title";
+    in property<string> description: "description";
+    in-out property<bool> ifTitle : true ;
+    in-out property<bool> ifDeviceName : false ;
+    in-out property<bool> connectState : false ;
+    in-out property<bool> ifRootPage : false ;
+    in-out property<bool> ifStartShow : false ;
+    in-out property<string> deviceName ;
+    //custom_scrollView{
+    //    height: parent.height;
+    //    width: parent.width;
+    
+        VerticalBox {
+            alignment:ifStartShow ? start : stretch;
+            spacing: Theme.spaces.small;
+            if(ifTitle):
+                HorizontalLayout {
+                    spacing: Theme.spaces.small;
+                    height: 24px;
+                    Icon{
+                        text:Icons.fa_var_paperclip;
+                        font_size:Theme.icon.size.large;
+                    }
+                    Text {  
+                        font-size: 20px;
+                        text <=> root.title;
+
+                    }
+        
+                    
+                    // Spacer
+                    Rectangle {}
+                    if(ifDeviceName):
+                    Rectangle {
+                        //width: _Namelabel.width*1.2;
+                        border-radius: self.height /4;
+                        background: Theme.palette.background;
+                        _Namelabel:=HorizontalLayout{
+                            alignment: center;
+                            spacing: Theme.spaces.small;
+                            Text {
+                                font-size: 20px;
+                                text: root.deviceName=="" ? " No Device Selected " : " " + root.deviceName;
+                                color: root.deviceName=="" ? Theme.palette.dark-red:Theme.palette.white;
+                            }
+                            Icon{
+                                text:root.connectState?  Icons.fa_var_link : Icons.fa_var_unlink;
+                                color:root.connectState? Theme.palette.dark-green : Theme.palette.dark-red;
+                                font_size:Theme.icon.size.medium;
+                            }
+                            
+                            
+                        }
+                        
+                        
+                    }
+                    HorizontalSpacerLarge{}
+                    /*
+                    CheckBox { 
+                        horizontal-stretch: 0;
+                        text: "Disable widgets";
+                        checked <=> PageSettings.widgets-disabled;
+                    }*/
+                }
+            
+                if(ifTitle): HorizontalSeparator{}
+            
+            
+            @children
+        }
+    //}
+}

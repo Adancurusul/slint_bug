@@ -1,0 +1,459 @@
+// Copyright © SixtyFPS GmbH <info@slint-ui.com>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-commercial
+
+import "./forkawesome-webfont.ttf";
+
+
+
+import { Icons } from "icons.slint";
+import  { IconSet } from "icon.slint";
+export { Icons }
+
+
+export component FocusBorder inherits Rectangle {
+    border_width: 1px;
+    border_color: Theme.palette.foreground;
+}
+// `Icon` is a text component that uses the `ForkAwesome` font.
+export component Icon inherits Text {
+    font_family: Theme.icon.font_family;
+    font_size: Theme.icon.size.small;
+    color: Theme.palette.foreground;
+    vertical_stretch: 0;
+    horizontal_stretch: 0;
+}
+
+
+
+
+export struct Sizes  {
+    // Defines the extra extra small size.
+    extra_extra_small: length,
+
+    // Defines the extra small size.
+    extra_small: length,
+
+    // Defines the small size.
+    small: length,
+
+    // Defines the medium size.
+    medium: length,
+
+    // Defines the large size.
+    large: length,
+}
+export struct Palette {
+    // primary
+    slint-blue: brush,
+    pure-black: brush,
+    dark-deep-blue: brush,
+    shark-gray: brush,
+    limon-green: brush,
+    limon-green-op10: brush,
+    white: brush,
+    dimmer: brush,
+
+    // slint blue
+    slint-blue-50: brush,
+    slint-blue-100: brush,
+    slint-blue-200: brush,
+    slint-blue-300: brush,
+    slint-blue-400: brush,
+    slint-blue-500: brush,
+    slint-blue-600: brush,
+    slint-blue-700: brush,
+    slint-blue-800: brush,
+    slint-blue-900: brush,
+
+    // limon green
+    lime-green-50: brush,
+    lime-green-100: brush,
+    lime-green-200: brush,
+    lime-green-300: brush,
+    lime-green-400: brush,
+    lime-green-500: brush,
+    lime-green-600: brush,
+    lime-green-700: brush,
+    lime-green-800: brush,
+    lime-green-900: brush,
+
+    // gradients
+    limon-green-gradient: brush,
+    limon-green-light-gradient: brush,
+    limon-green-radial-gradient: brush,
+    slint-blue-gradient: brush,
+    heliotrope-gradient: brush,
+    dark-left-gradient: brush,
+    dark-right-gradient: brush,
+    ebony-radial-gradient: brush,
+    bar-gradient: brush,
+    alternative-bar-gradient: brush,
+    alternative-light-bar-gradient: brush,
+    inverted-bar-gradient: brush,
+    inverted-alternative-bar-gradient: brush,
+    bar-background-gradient: brush,
+    tab-gradient: brush,
+    background-gradient: brush,
+    custom-tab-background: brush,
+    custom-page-background: brush,
+    custom-button-background: brush,
+    custom-button-clicked: brush,
+    custom-button-hover: brush,
+    custom-font-color: brush,
+    custom-font-color-pressed: brush,
+    custom-slider-color-background: brush,
+    custom-slider-color-hover: brush,
+    custom-slider-color-pressed: brush,
+
+    //foreground:brush,
+    //primary:brush,
+    //background: brush,
+    //error: brush,
+    //border:brush,
+    dark-red: brush,
+    dark-green: brush,
+    background: brush,
+    background_alt: brush,
+    foreground: brush,
+    foreground_disabled: brush,
+    surface: brush,
+    surface_disabled: brush,
+    on_surface: brush,
+    primary: brush,
+    on_primary: brush,
+    border: brush,
+    border_disabled:brush,
+    state: brush,
+    shadow: brush,
+    error: brush,
+}
+
+export struct Spaces {
+    small: length,
+    medium: length,
+    large: length,
+}
+
+export struct Durations {
+    fast: duration,
+    medium: duration,
+    slow: duration,
+}
+
+struct Font {
+    size: length,
+    weight: float,
+}
+
+
+export struct Settings  {
+    // If set to `true` some widgets are adjusted in size and handling e.g. the keyboard buttons.
+    //
+    // This property minimizes sizes and also the behavior of some widgets. 
+    // This should be used if there some issues on mcu platforms like the pitheme.theme.
+    minimize: bool,
+} 
+
+export struct Typo {
+    label: Font,
+    label-light: Font,
+    header: Font,
+    header-item: Font,
+    header-item-light: Font,
+    value: Font,
+    desciption: Font,
+    desciption-light: Font,
+    value-big: Font,
+    small_label: Font,
+
+    // Defines typo of medium labels.
+    medium_label: Font,
+
+    // Defines typo of large labels.
+    large_label: Font,
+
+    // Defines typo of small titles.
+    small_title: Font,
+
+    // Defines typo of medium titles.
+    medium_title: Font,
+
+    // Defines typo of large titles.
+    large_title: Font,
+}
+
+
+export struct Radius  {
+    // Defines the extra extra small border radius.
+    extra_extra_small: length,
+
+    // Defines the extra small border radius.
+    extra_small: length,
+
+    // Defines the small border radius.
+    small: length,
+
+    // Defines the medium border radius.
+    medium: length,
+
+    // Defines the large border radius.
+    large: length,
+}
+/*
+
+*/
+export struct States  {
+    // Defines hover float.
+    hover: float,
+
+    // Defines pressed float.
+    pressed: float,
+
+    // Defines container disabled float.
+    container_disabled: float,
+
+    // Defines content disabled float.
+    content_disabled: float,
+}
+export struct ImageStruct {
+    logo: image,
+    logo_ic:image,
+    homeIcon: image,
+    keyIcon: image,
+    saveIcon: image,
+    rightArrowIcon:image,
+    listExpandIcon:image,
+    listNotExpandIcon:image,
+    temperatureIcon:image,
+    //KuninIconJpg:image,
+    KuninIconPng:image,
+} 
+export global Theme {
+    in-out property <bool> dark: false;
+    in-out property <brush> accent_color: root.dark ? #01fec5: #324c6c;
+    in property <bool> embedded_helper;
+    // Defines the on accent (primary) brush.
+    in-out property <brush> on_accent_color:  root.dark ? #212121: #dfdfdf;
+    in-out property<ImageStruct> images:{
+        logo: @image-url("../icons/logo.png"),
+        logo_ic: @image-url("../icons/logo_ic.png"),
+        homeIcon: @image-url("../icons/main_mainPage.png"),
+        keyIcon: @image-url("../icons/key.png"),
+        saveIcon: @image-url("../icons/save.png"),
+        rightArrowIcon:@image-url("../icons/right_arrow.png"),
+        rightArrowIcon:@image-url("../icons/right_arrow.png"),
+        listExpandIcon:@image-url("../icons/list_expand.png"),
+        listNotExpandIcon:@image-url("../icons/list_not_expand.png"),
+        temperatureIcon:@image-url("../icons/temperature.png"),
+    };
+    in property <Settings> settings: {
+        minimize: false,
+    };
+    in property <IconSet> icon: {
+        size: {
+            small: 12px,
+            medium: 14px,
+            large: 16px,
+            superLarge:20px,
+        },
+        font_family: "forkawesome",
+    };
+    in property <Radius> radius: {
+        extra_extra_small: 2px,
+        extra_small: 4px,
+        small: 6px,
+        medium: 8px,
+        large: 16px,
+    };
+    in property <Sizes> sizes: {
+        extra_extra_small: 4px,
+        extra_small: 20px,
+        small: 26px,
+        medium: 32px,
+        large: 44px,
+    };
+    in property <States> state: {
+        hover: 0.2,
+        pressed: 0.4,
+        container_disabled: 0.38,
+        content_disabled: 0.38,
+    };
+    in property <Palette> palette: {
+        // primary
+        slint-blue: #0025FF,
+        pure-black: #000000,
+        dark-deep-blue: #040708,
+        shark-gray: #2C2F36,
+        limon-green: #DEFB3A,
+        limon-green-op10: #defb3a1a,
+        white: #FFFFFF,
+        dimmer: #0000007b,
+
+        // slint blue
+        slint-blue-50: #EEE6FF,
+        slint-blue-100: #D0C3FF,
+        slint-blue-200: #AF9AFF,
+        slint-blue-300: #896FFF,
+        slint-blue-400: #654EFF,
+        slint-blue-500: #2F2AFF,
+        slint-blue-600: #0025FF,
+        slint-blue-700: #001FF7,
+        slint-blue-800: #0019F2,
+        slint-blue-900: #000AEF,
+
+        // limon gren
+        lime-green-50: #FBFFE6,
+        lime-green-100: #F4FDC0,
+        lime-green-200: #EBFC93,
+        lime-green-300: #E2FA63,
+        lime-green-400: #DEFB3A,
+        lime-green-500: #D6F800,
+        lime-green-600: #CBE600,
+        lime-green-700: #BBCF00,
+        lime-green-800: #ACB700,
+        lime-green-900: #D9D9D9,
+
+        // gradients
+        limon-green-gradient: @linear-gradient(135deg, #defb3a75 0%, #defb3a00 100%),
+        limon-green-light-gradient: @linear-gradient(135deg, #DEFB3A 0%, #defb3a33 100%),
+        limon-green-radial-gradient: @radial-gradient(circle, #DEFB3A20 0%, #DEFB3A00 100%),
+        slint-blue-gradient: @linear-gradient(135deg, #6c4bff76 0%, #6C4BFF00 100%),
+        heliotrope-gradient: @linear-gradient(180deg, #896fff 0%, #39316B 100%),
+        dark-left-gradient: @linear-gradient(90deg, #040708 0%, #04070875 50%, #04070800 100%),
+        dark-right-gradient: @linear-gradient(90deg, #04070800 0%, #04070875 50%, #040708 100%),
+        ebony-radial-gradient: @radial-gradient(circle, #100F23 0%, #1F1946 100%),
+        bar-gradient: @linear-gradient(180deg, #6C4BFF 0%, #6c4bff00 100%),
+        alternative-bar-gradient: @linear-gradient(180deg, #CBE600 0%, #CBE60000 100%),
+        alternative-light-bar-gradient: @linear-gradient(180deg, #EBFC93 0%, #EBFC9300 100%),
+        inverted-bar-gradient: @linear-gradient(180deg, #6c4bff00 0%, #6C4BFF 100%),
+        inverted-alternative-bar-gradient: @linear-gradient(180deg, #CBE60000 0%, #CBE600 100%),
+        bar-background-gradient: @linear-gradient(180deg, #896FFF 0%, #896FFF00 100%),
+        tab-gradient: @linear-gradient(180deg, #0026ff21 0%, #0026ff01 100%),
+        background-gradient: @radial-gradient(circle, #0026ff40 50%, #0025FF00 100%),
+
+
+        //tab
+        //background: #bed1e9,
+        custom-page-background:#ffffff,
+        custom-tab-background: #bed1e9,
+        custom-icon-background: #324c6c,
+        custom-button-background: #739dd0,
+        custom-button-clicked: #7F9AB9,
+        custom-button-hover: #7d8bb9,
+        custom-font-color: #010101,
+        custom-font-color-pressed: #29324e,//#aebfd5
+        custom-slider-color-background: #aebfd5,
+        custom-slider-color-hover: #abc2e5,
+        custom-slider-color-pressed: #969cbd,
+        //foreground: #dfdfdf,
+        //foreground: #324c6c,
+        //primary:#dfdfdf,
+        //primary:#324c6c,
+        //error: #EF5350,
+        //border:#324c6c,
+        dark-red: #b20000,
+        dark-green: #4cae00,
+
+        background: root.dark ? #2d2d2d: #bed1e9,
+        background_alt: root.dark ? #414141: #cbcbcb,
+        foreground: root.dark ? #dfdfdf: #324c6c,
+        foreground_disabled: root.dark ? #7b7b7b: #aebfd5,
+        surface: root.dark ? #505050: #BDBDBD,
+        surface_disabled: root.dark ? #3d3d3d: #d2d2d2,
+        on_surface: root.dark ? #212121: #dfdfdf,  
+        primary: root.accent_color,
+        on_primary: root.on_accent_color,
+        border: root.dark ? #7e7e7e: #324c6c,
+        border_disabled: root.dark ? #494949: #c5c5c5,
+        state: #000000,
+        shadow: #000000,
+        error: #EF5350,
+
+
+
+
+
+    };
+    
+    in-out property<duration> showTime: 1000ms;
+    in property <Spaces> spaces: {
+        small: 5px,
+        medium: 10px,
+        large: 20px,
+    };
+
+    in property <Durations> durations: {
+        fast: 125ms,
+        medium: 200ms,
+        slow: 500ms,
+    };
+
+    in property <Typo> typo: {
+        label-light: {
+            size: 12px,
+            weight: 400
+        },
+        label: {
+            size: 12px,
+            weight: 500
+        },
+        header: {
+            size: 16px,
+            weight: 600
+        },
+        header-item: {
+            size: 18px,
+            weight: 400
+        },
+        header-item-light: {
+            size: 18px,
+            weight: 200
+        },
+        value: {
+            size: 26px,
+            weight: 500
+        },
+        desciption: {
+            size: 14px,
+            weight: 400
+        },
+        desciption-light: {
+            size: 14px,
+            weight: 200
+        },
+        value-big: {
+            size: 40px,
+            weight: 200
+        },
+        small_label: {
+            // family: "Roboto",
+            size: 12px,
+            weight: 400
+        },
+        medium_label: {
+            // family: "Roboto",
+            size: 12px,
+            weight: 500      
+        },
+        large_label: {
+            // family: "Roboto",
+            size: 14px,
+            weight: 500
+        },
+        small_title: {
+            // family: "Roboto",
+            size: 16px,
+            weight: 500      
+        },
+        medium_title:{
+            // family: "Roboto",
+            size: 20px,
+            weight: 500      
+        },
+        large_title: {
+            // family: "Roboto",
+            size: 24px,
+            weight: 500      
+        },
+    };
+}

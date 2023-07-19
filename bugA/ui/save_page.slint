@@ -1,0 +1,209 @@
+
+import {Theme,Icons,Icon} from "ui/theme.slint";
+import { Page } from "page.slint";
+import {Spacer ,HorizontalSpacerSmall, HorizontalSeparator,HorizontalSpacerLarge} from "ui/custom_widgets/custom_spacer.slint";
+import {Button ,RoundOutlineButton,RoundButton}from "ui/custom_widgets/custom_button.slint";
+import {MediumTitle,SmallTitle,SmallLabel,MediumLabel} from "ui/custom_widgets/custom_label.slint";
+import {custom_listView,GroupItemModel,ItemModel} from "ui/custom_widgets/custom_list.slint";
+import {TableView, Cell} from "ui/custom_widgets/custom_tableView.slint";
+import {PlotterPage,PlotArea} from "ui/plotter.slint";
+import {custom_popup} from "ui/custom_widgets/custom_popup.slint";
+import {CT_mainPageAdapter} from "MainAdapter.slint";
+
+import {TextLine}from "ui/custom_widgets/custom_textLine.slint";
+export global SavePageAdapter {
+    pure callback path_changed(string) -> bool;//是否有效路径
+    pure callback save_current_file(string/*path*/) -> bool;//是否有效路径
+    pure callback save_current_history(string/*path*/,int ) -> bool;//是否有效路径
+    pure callback save_current_history_all(string/*path*/) -> bool;//是否有效路径
+    in-out property<string> name <=> CT-mainPageAdapter.name;  
+    in-out property<string> path;
+    in-out property<string> popupString;
+    in-out property<bool> popupButton:true;   
+}
+export component SavePage inherits Rectangle{
+    
+    _popup_error := custom_popup{
+        //y: parent.height/2;
+        y: root.width/2;
+        layout := VerticalLayout {  
+            HorizontalLayout{
+                alignment: center;
+                padding: Theme.spaces.medium;
+                Icon{
+                    text:Icons.fa_var_bell_ringing;
+                    font_size: Theme.icon.size.large;
+                    color:Theme.palette.dark-red;
+                }
+            }
+            HorizontalLayout{
+                alignment: center;
+                HorizontalSpacerSmall{}
+                _txt_now:=Text {
+                    font_size: 14px;
+                    //font_weight: 400;
+                    text: SavePageAdapter.popupString;// "Please connect port ";
+                    color:Theme.palette.dark-red;
+                }
+                HorizontalSpacerSmall{}
+            }
+            if(SavePageAdapter.popupButton):
+            HorizontalLayout{
+                alignment: center;
+                Button{
+                    text:"OK";
+                }
+            }
+            }
+            
+    }  
+    Rectangle{
+        height:90%;
+        width:90%;
+        background:Theme.palette.background;
+        border-radius: 5px;
+        border-width: 1px;
+        border-color: self.background.darker(10%) ;
+        
+        VerticalLayout{
+            padding: Theme.spaces.large;
+                spacing: Theme.spaces.medium;
+            
+            MediumTitle {
+                text: "Save Page";
+            }
+            SmallLabel{
+                text: "CurrentDevice:"+SavePageAdapter.name;
+                //color: Theme.palette.foreground_disabled;
+            }
+            HorizontalSeparator {
+                //colspan: 8; 
+                background: Theme.palette.foreground_disabled;
+            }
+            HorizontalSpacerLarge{}
+            SmallLabel{
+                text: "Save Directory:";
+                //color: Theme.palette.foreground_disabled;
+            }
+            _path_line:=TextLine { 
+                text <=> SavePageAdapter.path;
+                icon: Icons.fa_var_list;
+                action_icon: Icons.fa_var_remove;
+                enabled: true;
+                clickable: true;
+                placeholder: "Insert a path";
+                has_error: SavePageAdapter.path_changed(self.text);
+
+                action => { self.text = "" }
+                edited=>{
+                    SavePageAdapter.path_changed(self.text);
+                }
+                //clicked => { root.open_keyboard("text_line", self.text, self.placeholder, self.icon); }
+            }
+            HorizontalSeparator {
+                //colspan: 8; 
+                background: Theme.palette.foreground_disabled;
+            }
+            HorizontalSpacerLarge{}
+            SmallLabel{
+                text: "Current Record Save";
+                //color: Theme.palette.foreground_disabled;
+            }
+            Button{
+                text:"Save";
+                icon: Icons.fa_var_save ;
+                clicked=>{
+                    SavePageAdapter.popupString = "Saving...";
+                    SavePageAdapter.popupButton = false;
+                    //SavePageAdapter.popupString = "Save Success";
+                    //SavePageAdapter.popupButton = true;
+                    _popup_error.show();
+                    debug("save");
+                    if(SavePageAdapter.save_current_file(_path_line.text ))
+                    {
+                        SavePageAdapter.popupString = "Save Success";
+                        SavePageAdapter.popupButton = true;
+                        _popup_error.show();
+                    }
+                    else
+                    {
+                        SavePageAdapter.popupString = "Save Failed";
+                        SavePageAdapter.popupButton = true;
+                        _popup_error.show();
+                    }
+                }
+            }
+            HorizontalSpacerLarge{}
+            SmallLabel{
+                text: "History Record Save";
+                //color: Theme.palette.foreground_disabled;
+            }
+            _device_list:=custom_listView {
+                height:200px;
+                //n-out property<bool> CT_empty: false;
+                //in-out property<bool> CH_empty: false;
+                property <GroupItemModel> list_one: {
+                    //text: CT_empty? "DTCT Series [empty]" : "DTCT Series",
+                    items: CT_mainPageAdapter.histoyDataItems
+                };
+                
+                model: [self.list_one];
+                current_item_changed(item)=>{
+                    //debug(item.parent);
+                    //debug(item.item);
+                    debug(self.model[0].items[item.item].text);
+                    
+                }
+            }
+            Button{
+                text:"SaveHisory";
+                icon: Icons.fa_var_save ;
+                clicked=>{
+                    SavePageAdapter.popupString = "Saving...";
+                    SavePageAdapter.popupButton = false;
+                    //SavePageAdapter.popupString = "Save Success";
+                    //SavePageAdapter.popupButton = true;
+                    _popup_error.show();
+                    debug(_device_list.current_item.item);
+                    if(SavePageAdapter.save_current_history(_path_line.text, _device_list.current_item.item))
+                    {
+                        SavePageAdapter.popupString = "Save Success";
+                        SavePageAdapter.popupButton = true;
+                        _popup_error.show();
+                    }
+                    else
+                    {
+                        SavePageAdapter.popupString = "Save Failed";
+                        SavePageAdapter.popupButton = true;
+                        _popup_error.show();
+                    }
+                }
+            }
+
+            Button{
+                text:"SaveAllHisory";
+                icon: Icons.fa_var_save ;
+                clicked=>{
+                    SavePageAdapter.popupString = "Saving...";
+                    SavePageAdapter.popupButton = false;
+                    //SavePageAdapter.popupString = "Save Success";
+                    //SavePageAdapter.popupButton = true;
+                    _popup_error.show();
+                    debug(_device_list.current_item.item);
+                    if(SavePageAdapter.save_current_history_all(_path_line.text))
+                    {
+                        SavePageAdapter.popupString = "Save Success";
+                        SavePageAdapter.popupButton = true;
+                        _popup_error.show();
+                    }
+                    else
+                    {
+                        SavePageAdapter.popupString = "Save Failed";
+                        SavePageAdapter.popupButton = true;
+                        _popup_error.show();
+                    }
+                }
+            }
+        }
+    }
+}

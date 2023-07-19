@@ -1,0 +1,48 @@
+// SPDX-FileCopyrightText: 2022 Florian Blasius <co_sl@tutanota.com>
+// SPDX-License-Identifier: MIT
+
+import { Theme } from "ui/theme.slint";
+
+// A vertical visual separator line.
+export component VerticalSeparator inherits Rectangle {
+    width: 1px;
+    background: Theme.palette.border_disabled;
+ }
+ 
+ // A horizontal visual separator line.
+ export component HorizontalSeparator inherits Rectangle {
+     height: 1px;
+     background: Theme.palette.border_disabled;
+  }
+// `Spacer` fills the remaining spae in a layout.
+export component Spacer inherits Rectangle {}
+
+// `VerticalSpacerSmall` fills vertical space with `Theme.spaces.small`.
+export component VerticalSpacerSmall inherits Spacer {
+    height: Theme.spaces.small;
+}
+
+// `VerticalSpacerMedium` fills vertical space with `Theme.spaces.medium`.
+export component VerticalSpacerMedium inherits Spacer {
+    height: Theme.spaces.medium;
+}
+
+//  `VerticalSpacerLarge` fills vertical space with `Theme.spaces.large`.
+export component VerticalSpacerLarge inherits Spacer {
+    height: Theme.spaces.large;
+}
+
+// `HorizontalSpacerSmall` fills horizontal space with `Theme.spaces.small`.
+export component HorizontalSpacerSmall inherits Spacer {
+    width: Theme.spaces.small;
+}
+
+// `HorizontalSpacerMedium` fills horizontal space with `Theme.spaces.medium`.
+export component HorizontalSpacerMedium inherits Spacer {
+    width: Theme.spaces.medium;
+}
+
+// `HorizontalSpacerLarge` fills horizontal space with `Theme.spaces.large`.
+export component HorizontalSpacerLarge inherits Spacer {
+    width: Theme.spaces.large;
+}

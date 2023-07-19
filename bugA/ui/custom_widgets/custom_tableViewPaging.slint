@@ -1,0 +1,127 @@
+import {TableView, Cell ,Column} from "ui/custom_widgets/custom_tableView.slint";
+import {Theme,Icons,Icon} from "ui/theme.slint";
+import {TextLine}from "ui/custom_widgets/custom_textLine.slint";
+import {Button ,RoundOutlineButton,RoundButton} from "ui/custom_widgets/custom_button.slint";
+import { VerticalBox } from "std-widgets.slint";
+import { TableView } from "custom_tableView.slint";
+import { MediumLabel , LargeLabel} from "custom_label.slint";
+import { RoundButton } from "custom_button.slint";
+
+
+
+export component custom_tableViewPaging inherits Rectangle{
+    in-out property <int> pageNum : getPageNum();//总页数
+    in-out property <int>  currentPage:1;
+    in-out property <int> eachPageDataNum:30;//每页数据量
+    in-out property <int> totalLength ;
+    in-out property <[[Cell]]> rows;
+    in-out property <[[Cell]]> currentPageRows ;//: rows.slice((currentPage-1)*eachPageDataNum,currentPage*eachPageDataNum) ;
+    in-out property <[Column]> columns <=> _main_table.columns;
+    callback accepted(int, int, string) ;
+    callback refresh() ;
+    //callback row_pointer_event(PointerEvent, int);
+
+    //callback row_clicked(int);
+    in property <length> header_height: Theme.sizes.medium;
+
+    // Defines the height of all cells.
+    in property <length> cell_height: Theme.sizes.medium;
+    callback onCurrentPageChanged(int, int);
+    public pure function getPageNum() -> int {
+       return  ( totalLength / eachPageDataNum  + 1 );
+    }
+    public pure function checkPage(numNow: int ) -> bool  {  
+        if(numNow>pageNum){
+            return true;
+        }
+        if(numNow<1){
+            return true;
+        }
+        return false;
+    }
+    public function fillCurrentPage(pageNow: int) {
+        if(pageNow > totalLength / eachPageDataNum+1){
+            return;
+        }
+        _change_page_line.text = pageNow;
+        onCurrentPageChanged((pageNow - 1) * eachPageDataNum , pageNow * eachPageDataNum);
+        
+    }   
+    VerticalBox { 
+        spacing: Theme.spaces.medium; 
+        _main_table := TableView { 
+            rows: currentPageRows;
+            accepted(a,b,c) => {
+                root.accepted(a,b,c);
+            }
+
+         }
+         HorizontalLayout {
+            alignment: center;
+            spacing: Theme.spaces.medium;
+            RoundButton {
+                icon: Icons.fa_var_chevron_left;
+                clicked=> {
+                    if(root.currentPage>1){
+                        root.currentPage -= 1;
+                        fillCurrentPage(root.currentPage);
+                    }
+                }
+            }
+            Rectangle {
+                //border-width: 1px;
+                //border-radius: 4px;
+                //border-color: Theme.palette.border;
+                HorizontalLayout {
+                    spacing: Theme.spaces.medium;
+                    VerticalLayout {
+                        alignment: center;
+                    _change_page_line:= TextLine { 
+                        height: 20px;
+                        width: 50px;
+                        text : currentPage;
+                        //icon: Icons.fa_var_list;
+                        //action_icon: Icons.fa_var_remove;
+                        //enabled: AppManager.widgets_enabled;
+                        //clickable: ; 
+                        placeholder: "";
+                        has_error: self.text.is_float() ? root.checkPage( self.text.to_float() ) : true;
+                        //action => { self.text = "" }
+                        clicked => { 
+            
+                            }
+                        }
+                    }
+                    VerticalLayout {alignment: center; LargeLabel  { text: "/" ; }}
+                    VerticalLayout {alignment: center; LargeLabel { text: pageNum; }}
+                    
+                    
+                    RoundButton { 
+                        icon: Icons.fa_var_repeat;
+                        clicked=> {
+                            if(_change_page_line.has_error){
+                                return;
+                            }
+                            //debug(currentPageRows.length);
+                            root.currentPage = _change_page_line.text.to_float();
+                            fillCurrentPage(root.currentPage);
+                            refresh();
+                        }
+                     }
+                }
+                
+
+            }
+            
+            RoundButton {
+                icon: Icons.fa_var_chevron_right;
+                clicked=> {
+                    if(root.currentPage<root.pageNum){
+                        root.currentPage += 1;
+                        fillCurrentPage(root.currentPage);
+                    }
+                }
+            }
+         }
+     }
+ }

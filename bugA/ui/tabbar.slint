@@ -1,0 +1,305 @@
+import {Theme,Icon,Icons} from "ui/theme.slint";
+import { VerticalBox, ListView } from "std-widgets.slint";
+
+import { Page ,rootPage} from "page.slint";
+import {CT_historyPage,PlotArea, CT_tablePage,CT_mainPage, ControlsPage,TableViewPage, TableViewPageAdapter ,PlotterPage,PlotterPageAdapter} from "./pages.slint";
+import {CT_mainPageAdapter} from "MainAdapter.slint";
+
+component North_TabButton inherits Rectangle {
+    //clip: true;
+    in-out property text <=> txt.text;
+    callback clicked <=> touch.clicked;
+    callback clicked <=> touch.clicked;
+    in property<bool> selected;
+    in-out property<float> opacityNow;
+    in-out property<float> opacityState;
+    in property<bool> has-focus;
+    in-out property<duration> showTime: Theme.showTime;
+    //border-radius: root.height / 2;
+    //border-width: 1px;
+    //border-color: root.background.darker(25%);
+    //background:  #6b8282 ;
+    background:  Theme.palette.custom-tab-background ;
+    
+    height: txt.preferred-height * 1.5;
+    min-width: txt.preferred-width + 20px;
+    state:=Rectangle{
+        opacity: root.opacityNow;
+        viewRectangle := Rectangle { 
+            border-radius: parent.width*0.1;
+            width: parent.width*0.9 ; 
+            opacity: 1;
+            x: parent.width*0.05;
+            background: #ffffff;
+            animate opacity { duration: showTime; }
+            lowRect:=Rectangle{
+                width: parent.width*1.1 ; 
+                height: root.height/2;
+                y:root.height/2;
+                opacity: 1;
+                background: #ffffff;
+                animate opacity { duration: showTime; }
+                
+            }
+            
+            
+        }
+        leftRect:=Rectangle{
+            
+                width: parent.width*0.1 ; 
+                height: root.height/2;
+                y:root.height/2;
+                x:0;
+                opacity: 1;
+                background: #ffffff;
+                animate opacity { duration: showTime; }
+                leftCircle :=Rectangle{
+                    width: root.width*0.1;
+                    height: root.height;
+                    background: root.background;
+                    border-radius: root.width*0.1;
+                    x:-self.width/2;
+                    y:-root.height/2;
+                }
+                
+            }
+        rightRect:=Rectangle{
+            
+                width: parent.width*0.1 ; 
+                height: root.height/2;
+                y:root.height/2;
+                x:root.width - self.width;
+                opacity: 1;
+                background: #ffffff;
+                animate opacity { duration: showTime; }
+                rightCircle :=Rectangle{
+                    width: root.width*0.1;
+                    height: root.height;
+                    background: root.background;
+                    border-radius: root.width*0.1;
+                    x:+self.width/2;
+                    y:-parent.height;
+                }
+                
+            }
+        
+    }
+    
+    txt := Text {
+        x: (parent.width - self.width)/2 + (touch.pressed ? 2px : 0);
+        y: (parent.height - self.height)/2 + (touch.pressed ? 1px : 0);
+        //color: touch.pressed ? #fff : #eee;
+    }
+    touch := TouchArea { }
+    states [  
+        pressed when touch.pressed : {
+            root.opacityNow: 0.8;
+        }
+        hover when touch.has-hover : {
+            root.opacityNow: 0.6;
+        }
+        selected when root.selected : {
+            root.opacityNow: 1;
+        }
+        focused when root.has-focus : {
+            root.opacityNow: 0.8;
+        }
+    ]
+    
+}
+
+component South_TabButton inherits Rectangle {
+    //clip: true;
+    in-out property text <=> txt.text;
+    in-out property icon <=> _icon.text;
+    callback clicked <=> touch.clicked;
+    callback clicked <=> touch.clicked;
+    in property<bool> selected;
+    in-out property<float> opacityNow;
+    in-out property<float> opacityState;
+    in property<bool> has-focus;
+    in-out property<duration> showTime: Theme.showTime;
+    //border-radius: root.height / 2;
+    //border-width: 1px;
+    //border-color: root.background.darker(25%);
+    //background:  #6b8282 ;
+    background:  Theme.palette.custom-tab-background ;
+    height: txt.preferred-height * 1.5;
+    min-width: txt.preferred-width + 20px;
+    state:=Rectangle{
+        opacity: root.opacityNow;
+        viewRectangle := Rectangle { 
+            border-radius: parent.width*0.1;
+            width: parent.width*0.9 ; 
+            opacity: 1;
+            x: parent.width*0.05;
+            background: #ffffff;
+            animate opacity { duration: showTime; }
+            lowRect:=Rectangle{
+                width: parent.width*1.1 ; 
+                height: root.height/2;
+                y:0;
+                opacity: 1;
+                background: #ffffff;
+                animate opacity { duration: showTime; }
+                
+            }
+            
+            
+        }
+        leftRect:=Rectangle{
+                
+                width: parent.width*0.1 ; 
+                height: root.height/2;
+                y:0;
+                x:0;
+                opacity: 1;
+                background: #ffffff;
+                animate opacity { duration: showTime; }
+                leftCircle :=Rectangle{
+                    width: root.width*0.1;
+                    height: root.height;
+                    background: root.background;
+                    border-radius: root.width*0.1;
+                    x:-self.width/2;
+                    y:0;
+                }
+                
+            }
+            
+        rightRect:=Rectangle{
+            
+                width: parent.width*0.1 ; 
+                height: root.height/2;
+                y:0;
+                x:root.width - self.width;
+                opacity: 1;
+                background: #ffffff;
+                animate opacity { duration: showTime; }
+                rightCircle :=Rectangle{
+                    width: root.width*0.1;
+                    height: root.height;
+                    background: root.background;
+                    border-radius: root.width*0.1;
+                    x:+self.width/2;
+                    y:0;
+                }
+                
+            }
+        
+    }
+    HorizontalLayout {
+        x: (parent.width - self.width)/2 + (touch.pressed ? 2px : 0);
+        y: (parent.height - self.height)/2 + (touch.pressed ? 1px : 0) +2px;
+        alignment:center;
+        spacing: Theme.spaces.small;
+        _icon := Icon {
+            
+        }
+        txt := Text {
+            
+            //color: touch.pressed ? #fff : #eee;
+        }
+    }
+    
+    touch := TouchArea { }
+    states [  
+        pressed when touch.pressed : {
+            root.opacityNow: 0.8;
+        }
+        hover when touch.has-hover : {
+            root.opacityNow: 0.6;
+        }
+        selected when root.selected : {
+            root.opacityNow: 1;
+        }
+        focused when root.has-focus : {
+            root.opacityNow: 0.8;
+        }
+    ]
+    
+}
+
+export component custom_TabBar inherits rootPage {
+    
+    preferred-height: 400px;
+    preferred-width: 400px;
+    //title: "current divice : DTCT-A03";
+    ifTitle:false;
+    in-out property<duration> showTime: Theme.showTime;
+    in-out property <int> active-tab;
+    in-out property <string> deviceNameTab;
+    VerticalLayout {
+        
+        Rectangle {
+            //width:parent.width - parent.height;
+            clip: true;
+            
+            CT_mainPage {
+                //previewPlot:PlotterPageAdapter.render_plot(PlotterPageAdapter.xMiddle, PlotterPageAdapter.yMiddle);
+                ifDeviceName:true;
+                deviceName:root.deviceNameTab;
+                x: root.active-tab == 0 ? 0 : root.active-tab < 0 ? - self.width - 1px : parent.width + 1px;
+               animate x { duration: showTime; easing: ease; }
+            }
+            _tpg:=CT_tablePage {
+                //previewPlot:PlotterPageAdapter.render_plot(PlotterPageAdapter.xMiddle, PlotterPageAdapter.yMiddle);
+                ifDeviceName:true;
+                deviceName:root.deviceNameTab;
+                x: root.active-tab == 1 ? 0 : root.active-tab < 1 ? - self.width - 1px : parent.width + 1px;
+                animate x { duration: showTime; easing: ease; }
+                
+                
+            }
+            PlotterPage {
+                //ifTitle: true;
+                connectState <=> _tpg.connectState;
+                ifDeviceName:true;
+                deviceName:root.deviceNameTab;
+                x: root.active-tab == 2 ? 0 : root.active-tab < 2 ? - self.width - 1px : parent.width + 1px;
+                animate x { duration: showTime; easing: ease; }
+            }
+            _hsp:=CT_historyPage {
+                //ifTitle: true;
+                ifDeviceName:true;
+                deviceName:root.deviceNameTab;
+                x: root.active-tab == 3 ? 0 : root.active-tab < 3 ? - self.width - 1px : parent.width + 1px;
+                animate x { duration: showTime; easing: ease; }
+            }
+        }
+        tab_area :=Rectangle {
+            clip: true;
+            
+            tab_bar := HorizontalLayout {
+                spacing: 0px;
+                South_TabButton {
+                    icon:Icons.fa_var_indent;
+                    text: "MainView";
+                    clicked => { root.active-tab = 0; }
+                    selected: root.active-tab == 0 ? true: false;
+
+                }
+                South_TabButton {
+                    icon:Icons.fa_var_table;
+                    text: "TableView";
+                    clicked => { root.active-tab = 1; _tpg.refresh();}
+                    selected: root.active-tab == 1 ? true: false;
+                }
+                South_TabButton {
+                    icon:Icons.fa_var_area_chart;
+                    text: "PlotView";
+                    clicked => { root.active-tab = 2; }
+                    selected: root.active-tab == 2 ? true: false;
+                }
+                South_TabButton {
+                    icon:Icons.fa_var_history;
+                    text: "History";
+                    clicked => { root.active-tab = 3; _hsp.refresh();}
+                    selected: root.active-tab == 3 ? true: false;
+                }
+            }
+        }
+        
+        
+    }
+}

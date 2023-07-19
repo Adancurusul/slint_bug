@@ -1,0 +1,140 @@
+import {Theme,Icon} from "ui/theme.slint";
+
+export component custom_roundButton inherits Rectangle {
+   // in-out property text <=> txt.text;
+    in-out property<image> icon <=> img.source ;
+    in-out property<length> icon-width <=> img.width ;
+    in-out property<bool> checkable :false ;
+    in-out property<bool> checked :false;
+    in-out property<bool> float_x :false;//x轴浮动
+    in-out property<bool> float_y :false;//y轴浮动
+    callback float_move_y(length);
+    //callback clicked ;
+    //in-out property<physical-length> img_size <=> img.width;
+    out property<bool> has-hover <=> touch.has-hover;
+    callback clicked ;//<=> touch.clicked;
+    callback pressed ;
+    border-radius: root.height /2;
+    border-width: 1px;
+    opacity: 0.8;
+    border-color: root.background.darker(10%) ;
+    background: touch.pressed||checked ? Theme.palette.custom-button-clicked: touch.has-hover ? Theme.palette.custom-button-hover :  Theme.palette.custom-button-background;
+    height: root.width;
+    
+    //min-width: txt.preferred-width + 20px;
+    VerticalLayout{
+        Rectangle{
+            img :=Image{
+                    x: (parent.width - self.width)/2 + (touch.pressed ? 2px : 0);
+                    y: (parent.height - self.height)/2 + (touch.pressed ? 1px : 0);
+                    width:24px;
+                    source:Theme.images.logo;
+                } 
+        }
+    }
+    
+    touch := TouchArea {
+        
+        width: 100%;
+        height: 100%; 
+        pointer-event(event) => {
+            if(float_x){
+                //root.x = touch.mouse-x ;
+            }
+            if(float_y){
+                //root.y = touch.mouse-y ;
+                //debug(touch.mouse-y);
+            }
+            pressed();
+        }
+        moved =>{
+            if(float_x){
+                root.x = touch.mouse-x ;
+            }
+            if(float_y){
+                float_move_y(touch.pressed-y  -  touch.mouse-y);
+                //root.y = touch.mouse-y ;
+            }
+        }
+        clicked=>{
+            if(checkable){
+                checked = !checked;
+            }
+            root.clicked();
+        }
+    }
+}
+
+
+export component custom_roundButton_textIcon inherits Rectangle {
+    // in-out property text <=> txt.text;
+     in-out property<string> icon <=> img.text ;
+     in-out property<length> icon-width <=> img.width ;
+     in-out property<bool> checkable :false ;
+     in-out property<bool> checked :false;
+     in-out property<bool> float_x :false;//x轴浮动
+     in-out property<bool> float_y :false;//y轴浮动
+     callback float_move_y(length);
+     //callback clicked ;
+     //in-out property<physical-length> img_size <=> img.width;
+     out property<bool> has-hover <=> touch.has-hover;
+     callback clicked ;//<=> touch.clicked;
+     callback pressed ;
+     border-radius: root.height /2;
+     border-width: 1px;
+     opacity: 0.8;
+     border-color: root.background.darker(10%) ;
+     background: touch.pressed||checked ? Theme.palette.custom-button-clicked: touch.has-hover ? Theme.palette.custom-button-hover :  Theme.palette.custom-button-background;
+     height: root.width;
+     
+     //min-width: txt.preferred-width + 20px;
+     VerticalLayout{
+         Rectangle{
+            //x: (parent.width - self.width)/2 + (touch.pressed ? 2px : 0);
+            //y: (parent.height - self.height)/2 + (touch.pressed ? 1px : 0);
+             img :=Icon{
+                     //x: (parent.width - self.width)/2 + (touch.pressed ? 2px : 0);
+                     //y: (parent.height - self.height)/2 + (touch.pressed ? 1px : 0);
+                     //width:24px;
+                     //text:"1";
+                 } 
+         }
+     }
+     
+     touch := TouchArea {
+         
+         width: 100%;
+         height: 100%; 
+         pointer-event(event) => {
+             if(float_x){
+                 //root.x = touch.mouse-x ;
+             }
+             if(float_y){
+                 //root.y = touch.mouse-y ;
+                 //debug(touch.mouse-y);
+             }
+             pressed();
+         }
+         moved =>{
+             if(float_x){
+                 root.x = touch.mouse-x ;
+             }
+             if(float_y){
+                 float_move_y(touch.pressed-y  -  touch.mouse-y);
+                 //root.y = touch.mouse-y ;
+             }
+         }
+         clicked=>{
+             if(checkable){
+                 checked = !checked;
+             }
+             root.clicked();
+         }
+     }
+ }
+//export component Recipe inherits Window {
+//    VerticalLayout {
+//        alignment: start;
+//        Button { text: "Button"; }
+//    }
+//}

@@ -1,0 +1,300 @@
+// SPDX-FileCopyrightText: 2022 Florian Blasius <co_sl@tutanota.com>
+// SPDX-License-Identifier: MIT
+
+import { Theme, Icons,Icon } from "ui/theme.slint";
+import { FocusTouchArea } from "./focus_touch_area.slint";
+import { MediumLabel } from "./custom_label.slint";
+
+// `ButtonBase` is used as base for buttons that can be clicked.
+export component ButtonBase inherits FocusTouchArea {
+    // Used to set an optional icon on the button. .
+    in property <string> icon;
+
+    // Used to set the display text of the button
+    in property <string> text;
+
+    // Defines the text color.
+    in property <brush> text_color;
+
+    // Defines the text color.
+    in property <brush> icon_color;
+
+    // Defines the border color of the widget.
+    in property <brush> border_color;
+
+    // Defines the border width of the widget.
+    in property <length> border_width;
+
+    // Defines background of the widget.
+    in property <brush> background;
+
+    // Defines the size of the icon.
+    in property <length> icon_size:  Theme.icon.size.small;
+
+    // Used to scale the inner background container e.g. to add an effect by button pressed.
+    in property <float> container_scale: 1.0;
+
+    // Defines the border radius of the button background.
+    in property <length> border_radius: Theme.radius.large * root.container_scale; 
+
+    focus_border_radius: root.border_radius;
+    padding_left: Theme.spaces.large;
+    padding_right: Theme.spaces.large;
+
+    i_container := Rectangle {
+        x: (parent.width - self.width) / 2;
+        y: (parent.height - self.height) / 2;
+        width: root.width * root.container_scale;
+        height: root.height * root.container_scale;
+        background: root.background;
+        border_width: root.border_width;
+        border_color: root.border_color;
+        border_radius: root.border_radius;
+    }
+
+    HorizontalLayout {  
+        spacing: Theme.spaces.small;
+        padding_left: root.padding_right;
+        padding_right: root.padding_right;
+        alignment: center;
+
+        if(root.icon != "") : Icon {
+            vertical_alignment: center;
+            font_size: root.icon_size;
+            color: root.icon_color;
+            text: root.icon;
+        }
+
+        if(root.text != "") : Text {
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+            color: root.text_color;
+            font_size: Theme.typo.medium_label.size;
+            font_weight: Theme.typo.medium_label.weight;
+            // font_family: Theme.typo.medium_label.family;
+            text: root.text;
+        }
+    }
+}
+
+// `Button` represents the default button with filled surface.
+export component Button {
+    // Will be called when the widget is clicked (pressed and then released).
+    callback clicked <=> i_base.clicked;
+
+    // Used to set the display text of the button.
+    in property <string> text: "text";
+
+    // Used to set an optional icon on the button. .
+    in property <string> icon;
+
+    // If set to  `true` the button will filled with Theme.palette.primary`
+    in property <bool> primary: false;
+
+    // If set to false the widget is disabled.
+    in-out property <bool> enabled: true;
+
+    accessible-role: button;
+    accessible-label: root.text;
+    min_height: Theme.sizes.medium;
+    vertical-stretch: 0;
+    horizontal-stretch: 1;
+
+    i_base := ButtonBase {  
+        enabled: root.enabled;
+        background: root.primary ? Theme.palette.primary: Theme.palette.surface;
+        text_color: root.primary ? Theme.palette.on_primary: Theme.palette.foreground;
+        icon_color: self.text_color;
+        text: root.text;
+        icon: root.icon;
+
+        animate background { duration: Theme.durations.fast; }
+        animate text_color { duration: Theme.durations.fast; }
+        animate container_scale { duration: Theme.durations.fast; }
+    }
+
+    states [
+        disabled when !root.enabled: {
+            i_base.background: Theme.palette.surface_disabled;
+            i_base.text_color: Theme.palette.foreground_disabled;
+        }
+        pressed when i_base.focus_pressed: {
+            i_base.background: root.primary ? Theme.palette.primary.darker(Theme.state.pressed) : Theme.palette.surface.darker(Theme.state.pressed);
+            i_base.text_color: root.primary ? Theme.palette.on_primary.darker(Theme.state.pressed) : Theme.palette.foreground.darker(Theme.state.pressed);
+            i_base.container_scale: 0.98;
+        }
+        hover when i_base.has_hover: {
+            i_base.background: root.primary ? Theme.palette.primary.darker(Theme.state.hover) : Theme.palette.surface.darker(Theme.state.hover);
+            i_base.text_color:  root.primary ? Theme.palette.on_primary.darker(Theme.state.hover) : Theme.palette.foreground.darker(Theme.state.hover);
+        }
+    ]
+}
+
+// `OutlineButton` represents a default button with an outline border.
+export component OutlineButton {
+    // Will be called when the widget is clicked (pressed and then released).
+    callback clicked <=> i_base.clicked;
+
+    // Used to set the display text of the button.
+    in property <string> text: "text";
+
+    // Used to set an optional icon on the button. .
+    in property <string> icon;
+
+    // If set to  `true` the button will filled with Theme.palette.primary`
+    in property <bool> primary: false;
+
+    // If set to false the widget is disabled.
+    in property <bool> enabled: true; 
+
+    accessible-role: button;
+    accessible-label: root.text;
+    min_height: Theme.sizes.medium;
+    vertical-stretch: 0;
+    horizontal-stretch: 1;
+
+    i_base := ButtonBase {  
+        enabled: root.enabled;
+        background: root.primary ? Theme.palette.primary: Theme.palette.background;
+        text_color: root.primary ? Theme.palette.on_primary: Theme.palette.foreground;
+        icon_color: root.primary ? Theme.palette.on_primary: Theme.palette.primary;
+        border_width: 1px;
+        border_color: Theme.palette.border;
+        text: root.text;
+        icon: root.icon;
+
+        animate background { duration: Theme.durations.fast; }
+        animate text_color { duration: Theme.durations.fast; }
+        animate icon_color { duration: Theme.durations.fast; }
+        animate border_color { duration: Theme.durations.fast; }
+        animate container_scale { duration: Theme.durations.fast; }
+    }
+
+    states [
+        disabled when !root.enabled: {
+            i_base.background: Theme.palette.background;
+            i_base.border_color: Theme.palette.border_disabled;
+            i_base.text_color: Theme.palette.foreground_disabled;
+            i_base.icon_color: Theme.palette.foreground_disabled;
+        }
+        pressed when i_base.focus_pressed: {
+            i_base.background: root.primary ? Theme.palette.primary.darker(Theme.state.pressed) : Theme.palette.background.darker(Theme.state.pressed);
+            i_base.border_color: Theme.palette.border.darker(Theme.state.pressed);
+            i_base.text_color: root.primary ? Theme.palette.on_primary.darker(Theme.state.pressed) : Theme.palette.foreground.darker(Theme.state.pressed);
+            i_base.container_scale: 0.98;
+        }
+        hover when i_base.has_hover: {
+            i_base.background: root.primary ? Theme.palette.primary.darker(Theme.state.hover) : Theme.palette.background.darker(Theme.state.hover);
+            i_base.border_color: Theme.palette.border.darker(Theme.state.hover);
+            i_base.text_color: root.primary ? Theme.palette.on_primary.darker(Theme.state.hover) : Theme.palette.foreground.darker(Theme.state.hover);
+        }
+    ]
+}
+
+// `RoundButton` represents a round fixed sized button with ether an icon or a single character text.
+export component RoundButton {
+    // Will be called when the widget is clicked (pressed and then released).
+    callback clicked <=> i_base.clicked;
+
+    // Used to set an optional icon on the button. .
+    in property <string> icon <=> i_base.icon;
+
+    // Used to set the display text of the button.
+    in property <string> text <=> i_base.text;
+
+    // If set to false the widget is disabled.
+    in-out property <bool> enabled: true;
+
+    // Defines the round background.
+    in-out property <brush> icon_background: Theme.palette.background;
+
+    accessible-role: button;
+    width: Theme.sizes.medium;
+    height: root.width;
+    vertical_stretch: 0;
+    horizontal_stretch: 0;
+
+    i_base := ButtonBase {  
+        enabled: root.enabled;
+        background: root.icon_background;
+        text_color: Theme.palette.foreground;
+        icon_color: self.text_color;
+        padding_left: 0px;
+        padding_right: 0px;
+
+        animate text_color { duration: Theme.durations.fast; }
+    }
+
+    states [
+        disabled when !root.enabled: {
+            i_base.text_color: Theme.palette.foreground_disabled;
+        }
+        pressed when i_base.focus_pressed: {
+            i_base.background: root.icon_background.darker(Theme.state.pressed);
+            i_base.text_color: Theme.palette.foreground.darker(Theme.state.pressed);
+        }
+        hover when i_base.has_hover: {
+            i_base.background: root.icon_background.darker(Theme.state.hover);
+            i_base.text_color: Theme.palette.foreground.darker(Theme.state.hover);
+        }
+    ]
+
+    animate icon_background { duration: Theme.durations.fast; }
+}
+
+// `RoundOutlineButton` represents a round fixed sized button with ether an icon or a single character text and an outline border.
+export component RoundOutlineButton {
+    // Will be called when the widget is clicked (pressed and then released).
+    callback clicked <=> i_base.clicked;
+
+    // Used to set an optional icon on the button. .
+    in property <string> icon <=> i_base.icon;
+
+    // Used to set the display text of the button.
+    in property <string> text <=> i_base.text;
+
+    // If set to  `true` the button will filled with Theme.palette.primary`
+    in property <bool> primary: false;
+
+    // If set to false the widget is disabled.
+    in-out property <bool> enabled: true;
+
+    accessible-role: button;
+    width: Theme.sizes.medium;
+    height: root.width;
+    vertical_stretch: 0;
+    horizontal_stretch: 0;
+
+    i_base := ButtonBase {  
+        enabled: root.enabled;
+      
+        background: root.primary ? Theme.palette.primary: Theme.palette.background;
+        border_width: 1px;
+        text_color: root.primary ? Theme.palette.on_primary: Theme.palette.foreground;
+        icon_color: self.text_color;
+        border_color: Theme.palette.border;
+        padding_left: 0px;
+        padding_right: 0px;
+
+        animate background { duration: Theme.durations.fast; }
+        animate text_color { duration: Theme.durations.fast; }
+        animate icon_color { duration: Theme.durations.fast; }
+        animate border_color { duration: Theme.durations.fast; }
+    }
+
+    states [
+        disabled when !root.enabled: {
+            i_base.background: Theme.palette.background;
+            i_base.border_color: Theme.palette.border_disabled;
+            i_base.text_color: Theme.palette.foreground_disabled;
+        }
+        pressed when i_base.focus_pressed: {
+            i_base.background: root.primary ? Theme.palette.primary.darker(Theme.state.pressed) : Theme.palette.background.darker(Theme.state.pressed);
+            i_base.border_color: Theme.palette.border.darker(Theme.state.pressed);
+        }
+        hover when i_base.has_hover: {
+            i_base.background: root.primary ? Theme.palette.primary.darker(Theme.state.hover) : Theme.palette.background.darker(Theme.state.hover);
+            i_base.border_color: Theme.palette.border.darker(Theme.state.hover);
+        }
+    ]
+}

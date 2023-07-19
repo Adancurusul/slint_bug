@@ -1,0 +1,116 @@
+import { VerticalBox , HorizontalBox} from "std-widgets.slint";
+import {Theme} from "ui/theme.slint";
+export component custom_VSlider inherits Rectangle {
+    in-out property<float> maximum: 100;
+    in-out property<float> minimum: 0;
+    in-out property<int> intValue ;
+    in-out property<float> value ;
+    in-out property<int> lastValue;
+    callback onValueChanged(float);
+    max-height: 10px;
+    min-height: 10px;
+    min-width: 100px;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+
+    border-radius: root.height/2;
+    background: touch.pressed ? #eee: #ddd;
+    border-width: 1px;
+    border-color: root.background.darker(25%);
+
+    handle := Rectangle {
+        width: self.height;
+        height: parent.height;
+        border-width: 3px;
+        border-radius: self.height / 2;
+        background: touch.pressed ? Theme.palette.custom-slider-color-pressed: touch.has-hover ? Theme.palette.custom-slider-color-hover: Theme.palette.custom-slider-color-background;
+        border-color: self.background.darker(15%);
+        x: (root.width - handle.width) * (root.value - root.minimum)/(root.maximum - root.minimum);
+    }
+
+    alreadyMove := Rectangle {
+        height: parent.height;
+        width: ((root.width - handle.width ) * (root.value - root.minimum)/(root.maximum - root.minimum))
+        +self.height ;
+        //height: 1px *  (root.value - root.minimum) / (root.maximum - root.minimum);
+        border-width: 3px;
+        border-radius: self.height / 2;
+        background: touch.pressed ? Theme.palette.custom-slider-color-pressed: touch.has-hover ? Theme.palette.custom-slider-color-hover: Theme.palette.custom-slider-color-background;
+        border-color: self.background.darker(15%);
+        //x:0;
+        x: 0  ;
+    }
+
+    touch := TouchArea {
+        property <float> pressed-value;
+        pointer-event(event) => {
+            if (event.button == PointerEventButton.left && event.kind == PointerEventKind.down) {
+                self.pressed-value = root.value;
+            }
+        }
+        moved => {
+            if (self.enabled && self.pressed) {
+                root.value = max(root.minimum, min(root.maximum,
+                    self.pressed-value + (touch.mouse-x - touch.pressed-x) * (root.maximum - root.minimum) / (root.width - handle.width)));
+                root.onValueChanged(root.value);
+            }
+        }
+    }
+}
+
+
+export component custom_HSlider inherits Rectangle {
+    in-out property<float> maximum: 100;
+    in-out property<float> minimum: 0;
+    in-out property<float> value;
+    in-out property<float> realValue;
+    callback onValueChanged(float);
+    min-height: 100px;
+    min-width: 10px;
+    max-width: 10px;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+ 
+    border-radius: root.width/2;
+    background: touch.pressed ? #eee: #ddd;
+    border-width: 1px;
+    border-color: root.background.darker(25%);
+
+    handle := Rectangle {
+        width: parent.width;
+        height: self.width;
+        border-width: 3px;
+        border-radius: self.height / 2;
+        background: touch.pressed ? Theme.palette.custom-slider-color-pressed: touch.has-hover ? Theme.palette.custom-slider-color-hover: Theme.palette.custom-slider-color-background;
+        border-color: self.background.darker(15%);
+        y: root.height - self.width - ((root.height - handle.height ) * (root.value - root.minimum)/(root.maximum - root.minimum));
+    }
+    alreadyMove := Rectangle {
+        width: parent.width;
+        height: parent.height - self.y;
+        //height: 1px *  (root.value - root.minimum) / (root.maximum - root.minimum);
+        border-width: 3px;
+        border-radius: self.width / 2;
+        background: touch.pressed ? Theme.palette.custom-slider-color-pressed: touch.has-hover ? Theme.palette.custom-slider-color-hover: Theme.palette.custom-slider-color-background;
+        border-color: self.background.darker(15%);
+        y: root.height -  self.width - ((root.height - handle.height ) * (root.value - root.minimum)/(root.maximum - root.minimum));
+    }
+    touch := TouchArea {
+        property <float> pressed-value;
+        pointer-event(event) => {
+            if (event.button == PointerEventButton.left && event.kind == PointerEventKind.down) {
+                self.pressed-value = root.value;
+            }
+        }
+        moved => {
+            if (self.enabled && self.pressed) {
+
+                root.value = max(root.minimum, min(root.maximum,
+                    self.pressed-value + (touch.pressed-y - touch.mouse-y) * 
+                    (root.maximum - root.minimum) / (root.height - handle.height)));
+                root.realValue = root.maximum - root.value;
+                root.onValueChanged(root.value);
+            }
+        }
+    }
+}

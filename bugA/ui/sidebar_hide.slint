@@ -1,0 +1,292 @@
+import { Button, StyleMetrics } from "std-widgets.slint";
+import {Theme} from "ui/theme.slint";
+export component sideBar_right inherits Rectangle {
+    private property <bool> collapsed: true;//root.reference-width < root.break-point;
+
+    /// Defines the reference width to check `break-point`.
+    in-out property <length> reference-width;
+
+    /// If `reference-width` is less `break-point` the `SideBar` collapses.
+    in-out property <length> break-point: 300px;
+    in-out property <bool> use_pushbutton:false;
+    /// Set the text of the expand button.
+    in-out property <string> expand-button-text:"12221";
+    in-out property<bool> expaned:false;
+   // in-out property<brush> background <=> container.background;
+    width: 200px;
+
+    container := Rectangle {
+        touch := TouchArea {//铺上toucharea用于防止触发下层页面时间
+        
+            width: 100%;
+            height: 100%; 
+            
+        }
+        clip:true;
+        width: parent.width;
+        background: parent.background;
+        border-radius: root.border-radius;
+        border-width: root.border-width;
+        border-color: root.border-color ;
+        VerticalLayout {
+            padding: 2px;
+            alignment: start;
+
+            HorizontalLayout {
+                alignment: start;
+
+                if (root.collapsed && root.use_pushbutton) : Button {
+                    checked: root.expaned;
+                    text: root.expand-button-text;
+
+                    clicked => {
+                        root.expaned = !root.expaned;
+                    }
+                }
+                Rectangle{
+                    width : reference-width/2;
+                    @children
+                }
+                
+                _spacer:=Rectangle {//只会向里显示一半，另一半用空白遮挡
+                    width : reference-width/2;
+                }
+            }
+
+            
+        }
+
+        states [
+            expaned when root.expaned && root.collapsed : {
+                width: reference-width;
+
+                in {
+                    animate width { duration: Theme.durations.slow; }
+                }
+
+                out {
+                    animate width { duration:  Theme.durations.slow; }
+                }
+            in {
+                    animate width { duration:  Theme.durations.slow; }
+                }
+            out {
+                    animate width { duration:  Theme.durations.slow; }
+                }
+            }
+        ]
+    }
+
+    states [
+        collapsed when root.collapsed : {
+            width: 0px;
+        }
+    ]
+}
+
+export component SideBarTest inherits Window {
+    preferred-width: 400px;
+    min-height: 400px;
+
+    HorizontalLayout {
+    
+        Rectangle {
+            height: 100%;
+            //col: 1;
+            background: white;
+
+            HorizontalLayout {
+                padding: 8px;
+
+                Text {
+                    color: black;
+                    text: "Content";
+                }
+            }
+        }
+        
+        Button {
+            height: 50px;
+             width: 50px;
+                    //checked: container.expaned;
+                    //text: root.expand-button-text;
+
+                    clicked => {
+                        sd.expaned = !sd.expaned;
+                    }
+                }
+        sd:=sideBar_right {
+           // col: 0;
+            reference-width: parent.width;
+            expand-button-text: "e";
+        }
+    }
+}
+
+/*
+export component SideBarTest inherits Window {
+    preferred-width: 700px;
+    min-height: 400px;
+
+    GridLayout {
+        Rectangle {
+            height: 100%;
+            col: 2;
+            background: white;
+
+            HorizontalLayout {
+                padding: 8px;
+
+                Text {
+                    color: black;
+                    text: "Content";
+                }
+            }
+        }
+        Button {
+
+        col: 1;
+            height: 50px;
+             width: 50px;
+                    //checked: container.expaned;
+                    //text: root.expand-button-text;
+
+                    clicked => {
+                        sd.expaned = !sd.expaned;
+                    }
+                }
+        sd:=SideBar {
+            col: 0;
+            reference-width: parent.width;
+            expand-button-text: "E";
+        }
+    }
+}
+*/
+
+
+
+import { Button, StyleMetrics } from "std-widgets.slint";
+
+export component sideBar_left inherits Rectangle {
+    private property <bool> collapsed:true;// root.reference-width < root.break-point;
+
+    /// Defines the reference width to check `break-point`.
+    in-out property <length> reference-width;
+    in-out property <bool> use_pushbutton:false;
+    /// If `reference-width` is less `break-point` the `SideBar` collapses.
+    in-out property <length> break-point: 600px;
+
+    /// Set the text of the expand button.
+    in-out property <string> expand-button-text;
+    in-out property <bool> expaned ;
+    width: 0px;
+
+    container := Rectangle {
+        //property <bool> expaned;
+        clip:true;
+        width: parent.width;
+        border-radius: root.border-radius;
+        border-width: root.border-width;
+        border-color: root.border-color ;
+        background: parent.background;
+        touch := TouchArea {//铺上toucharea用于防止触发下层页面时间
+        
+            width: 100%;
+            height: 100%; 
+            
+        }
+        VerticalLayout {
+            padding: 2px;
+            alignment: start;
+
+            HorizontalLayout {
+                alignment: start;
+
+                if (root.collapsed && root.use_pushbutton) : Button {
+                    checked: root.expaned;
+                    text: root.expand-button-text;
+
+                    clicked => {
+                        root.expaned = !root.expaned;
+                    }
+                }
+                _spacer:=Rectangle {//只会向里显示一半，另一半用空白遮挡
+                    width : reference-width/2;
+                }
+                Rectangle{
+                    width : reference-width/2;
+                    @children
+                }
+                
+                
+            }
+
+        }
+
+        states [
+            expaned when root.expaned && root.collapsed : {
+                width: reference-width;
+
+                in {
+                    animate width { duration: 200ms; }
+                }
+
+                out {
+                    animate width { duration: 200ms; }
+                }
+            in {
+                    animate width { duration: 200ms; }
+                }
+            out {
+                    animate width { duration: 200ms; }
+                }
+            }
+        ]
+    }
+
+    states [
+        collapsed when root.collapsed : {
+            width:0px;
+        }
+    ]
+}
+
+export component SideBarTest_left inherits Window {
+    preferred-width: 700px;
+    min-height: 400px;
+
+    GridLayout {
+        Rectangle {
+            height: 100%;
+            col: 2;
+            background: white;
+
+            HorizontalLayout {
+                padding: 8px;
+
+                Text {
+                    color: black;
+                    text: "Content";
+                }
+            }
+        }
+        Button {
+
+        col: 1;
+            height: 50px;
+             width: 50px;
+                    //checked: container.expaned;
+                    //text: root.expand-button-text;
+
+                    clicked => {
+                        sd.expaned = !sd.expaned;
+                    }
+                }
+        sd:=sideBar_left {
+            col: 0;
+            reference-width: parent.width;
+            expand-button-text: "E";
+        }
+    }
+}

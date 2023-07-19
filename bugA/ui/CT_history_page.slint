@@ -1,0 +1,153 @@
+import {Theme,Icons,Icon} from "ui/theme.slint";
+import { Page } from "page.slint";
+import {Spacer ,HorizontalSpacerSmall, HorizontalSeparator,HorizontalSpacerLarge} from "ui/custom_widgets/custom_spacer.slint";
+import {Button ,RoundOutlineButton,RoundButton}from "ui/custom_widgets/custom_button.slint";
+import {MediumTitle,SmallTitle,SmallLabel,MediumLabel} from "ui/custom_widgets/custom_label.slint";
+import {TableView, Cell} from "ui/custom_widgets/custom_tableView.slint";
+import {PlotterPage,PlotArea} from "ui/plotter.slint";
+
+import {CT_mainPageAdapter} from "ui/CT_main_page.slint";
+
+
+export component CT_historyPage inherits Page {
+    connectState : CT_mainPageAdapter.currentConnect;
+    public function refresh() {
+        //_table_view.currentPageRows = CT_mainPageAdapter.getPageData();
+    }
+    title:"History View";
+    //preferred-width: 800px;
+    //preferred-height: 400px;
+    //in-out property <image> previewPlot <=>_plot_preview.source;
+    background:Theme.palette.custom-page-background;
+    VerticalLayout{
+        //alignment:start;
+        VerticalLayout{
+            alignment:start;
+            _basic_data:=GridLayout{
+                padding: Theme.spaces.large;
+                spacing: Theme.spaces.medium;
+                Row{
+                    SmallLabel{
+                        text: "Name";
+                        color: Theme.palette.foreground_disabled;
+                    }
+                    Spacer{}
+                    SmallLabel{
+                        text: "Version";
+                        color: Theme.palette.foreground_disabled;
+                    }
+                    Spacer{}
+                    SmallLabel{
+                        text: "History Count";
+                        color: Theme.palette.foreground_disabled;
+                    }
+                    Spacer{}
+                }
+                Row {
+                    HorizontalSeparator {
+                        colspan: 6; 
+                        background: Theme.palette.foreground_disabled;
+                    }
+                }
+                Row{
+                    MediumLabel{
+                        text: CT_mainPageAdapter.name;
+                    }
+                    Spacer{}
+                    MediumLabel{
+                        text: CT_mainPageAdapter._type;
+                    }
+                    Spacer{}
+                    MediumLabel{
+                        text: CT_mainPageAdapter.historyPreviewData.length;
+                    }
+                    Spacer{}
+                    
+                }
+            }
+        }
+    
+        HorizontalLayout{
+            preferred-height:root.height*0.8;
+            
+            _histroy_view:=VerticalLayout{
+                //col:1;
+                padding: Theme.spaces.large;
+                spacing: Theme.spaces.medium; 
+                MediumTitle {
+                    text: "History List";
+                }
+                HorizontalSeparator {
+                    //colspan: 8; 
+                    background: Theme.palette.foreground_disabled;
+                    
+                }
+                _history_table_preview:=TableView {
+                    min-height:root.height/9;
+                    background: Theme.palette.custom-tab-background;
+                    border-radius: 5px;
+                    border-width: 1px;
+                    border-color: self.background.darker(10%) ;
+                    private property <int> current_row: -1;
+                    accepted(row, cell, text) => {
+                        self.rows[self.row][cell].editable = false;
+                        self.rows[self.row][cell].value = text;
+                        self.current_row = -1;
+                    }
+                    columns: [
+                        { header: "Index", min_width: 35px },
+                        { header: "| Time",min_width: 100px },
+                        { header: "| Data Volume",min_width: 35px },
+                    ];
+                    rows: CT_mainPageAdapter.historyPreviewData;
+                    row_clicked(count)=> {
+                        debug(count);
+                        CT_mainPageAdapter.onHistoryDataChanged(count);
+                        CT_mainPageAdapter.historyDataIndex = count;
+                    }
+                }
+
+            }
+            _table_view:=VerticalLayout{
+                padding: Theme.spaces.large;
+                spacing: Theme.spaces.medium;    
+                MediumTitle {
+                    text: "History Table ";
+                }
+                SmallTitle {
+                    text: "Current History Index :" + CT_mainPageAdapter.historyDataIndex;
+                    color: Theme.palette.foreground_disabled;
+                }
+                HorizontalSeparator {
+                    //colspan: 8; 
+                    background: Theme.palette.foreground_disabled;
+                    
+                }
+                TableView {
+                    min-height:root.height/4;
+                    background: Theme.palette.custom-tab-background;
+                    border-radius: 5px;
+                    border-width: 1px;
+                    border-color: self.background.darker(10%) ;
+                    private property <int> current_row: -1;
+                    accepted(row, cell, text) => {
+                        self.rows[self.row][cell].editable = false;
+                        self.rows[self.row][cell].value = text;
+                        self.current_row = -1;
+                    }
+                    columns: [
+                        { header: "Index", min_width: 35px },
+                        { header: "| Time", horizontal_stretch: 1,min_width: 100px },
+                        { header: "| Temprature", horizontal_stretch: 1,min_width: 35px },
+                    ];
+                    rows: CT_mainPageAdapter.showHistoryData;
+                    
+                }
+                
+            }
+
+            
+        }
+        Spacer{}
+    }   
+}

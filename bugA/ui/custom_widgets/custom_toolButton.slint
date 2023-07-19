@@ -1,0 +1,55 @@
+import {Theme} from "ui/theme.slint";
+
+export component custom_toolButton inherits Rectangle {
+    in-out property text <=> txt.text;
+    in-out property<image> icon <=> img.source ;
+    in-out property<length> icon-width <=> img.width ;
+    in-out property<bool> checkable :false ;
+    in-out property<bool> checked :false;
+    //callback clicked ;
+    //in-out property<physical-length> img_size <=> img.width;
+    callback clicked ;//<=> touch.clicked;
+    border-radius: root.height /4;
+    border-width: 1px;
+    border-color: root.background.darker(25%);
+    background: touch.pressed||checked ? Theme.palette.custom-button-clicked: touch.has-hover ? Theme.palette.custom-button-hover :  Theme.palette.custom-button-background;
+    height: txt.preferred-height * 1.33;
+    min-width: txt.preferred-width + 20px;
+    VerticalLayout{
+        Rectangle{
+            img :=Image{
+                x: (parent.width - self.width)/2 + (touch.pressed ? 2px : 0);
+                y: (parent.height - self.height)/2 + (touch.pressed ? 1px : 0);
+                width:24px;
+                source:Theme.images.logo;
+            } 
+        }
+        Rectangle{
+            txt := Text {
+                x: (parent.width - self.width)/2 + (touch.pressed ? 2px : 0);
+                y: (parent.height - self.height)/2 + (touch.pressed ? 1px : 0);
+                color: touch.pressed||checked ? Theme.palette.custom-font-color : Theme.palette.custom-font-color-pressed;
+            }
+        }
+        
+    }
+    
+    touch := TouchArea {
+        
+        width: 100%;
+        height: 100%; 
+        clicked=>{
+            if(checkable){
+                checked = !checked;
+            }
+            root.clicked();
+        }
+    }
+}
+
+//export component Recipe inherits Window {
+//    VerticalLayout {
+//        alignment: start;
+//        Button { text: "Button"; }
+//    }
+//}

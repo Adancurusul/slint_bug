@@ -1,0 +1,585 @@
+// Copyright © SixtyFPS GmbH <info@slint-ui.com>
+// SPDX-License-Identifier: GPL-3.0-only OR LicenseRef-Slint-commercial
+import {Theme,Icons, Icon} from "ui/theme.slint";
+import { StyleMetrics } from "std-widgets.slint";
+
+import {custom_toolButton} from "ui/custom_widgets/custom_toolButton.slint";
+import {custom_popup} from "ui/custom_widgets/custom_popup.slint";
+import {sideBar_left} from "ui/sidebar_hide.slint";
+import {custom_scrollView} from "ui/custom_widgets/custom_scrollView.slint";
+import {custom_listView,GroupItemModel,ItemModel} from "ui/custom_widgets/custom_list.slint";
+import {MediumTitle,SmallTitle,SmallLabel,MediumLabel} from "ui/custom_widgets/custom_label.slint";
+import {custom_roundButton,custom_roundButton_textIcon} from "ui/custom_widgets/custom_roundButton.slint";
+import {Spacer ,HorizontalSpacerSmall, HorizontalSeparator} from "ui/custom_widgets/custom_spacer.slint";
+import {Button ,RoundOutlineButton,RoundButton}from "ui/custom_widgets/custom_button.slint";
+import { ComboBox } from "ui/custom_widgets/custom_comboBox.slint";
+import {CT_mainPageAdapter} from "MainAdapter.slint";
+
+component SideBarItem inherits Rectangle {
+    callback clicked <=> touch.clicked;
+    in-out property<string> text <=> label.text;
+    in property<bool> selected;
+    in property<image> imgNow;
+    in property<string> iconNow;
+    in property<bool> has-focus;
+
+    min-height: l.preferred-height; 
+
+    state := Rectangle {  
+        opacity: 0;
+        background: StyleMetrics.window-background;
+
+        animate opacity { duration: 150ms; }
+    }
+    
+    l := HorizontalLayout {  
+        y: (parent.height - self.height) / 2;
+        padding: StyleMetrics.layout-padding;
+        spacing: 2px;
+        
+        //Image{
+        //    width: 24px;
+        //    source: @image-url("../thumbsup.png");
+        //}
+        Icon{
+            text:root.iconNow;
+        }
+        label := Text {
+            color: StyleMetrics.default-text-color;
+            vertical-alignment: center;
+         }
+    }
+
+    touch := TouchArea {
+        width: 100%;
+        height: 100%;
+    }
+
+    states [  
+        pressed when touch.pressed : {
+            state.opacity: 0.8;
+        }
+        hover when touch.has-hover : {
+            state.opacity: 0.6;
+        }
+        selected when root.selected : {
+            state.opacity: 1;
+        }
+        focused when root.has-focus : {
+            state.opacity: 0.8;
+        }
+    ]
+}
+
+export global LeftSideBarAdapter  {
+    //in-out property <int> the-value;
+    //pure callback magic-operation(int) -> int;
+    in-out property <{ parent: int, item: int }> current_item ;
+    in-out property<bool> connectState :false;
+    in-out property<bool> ifConnecting :false;
+    in-out property<string> deviceCT : CT_mainPageAdapter.name ;
+    in-out property<string> deviceCH ;
+    in-out property<[ItemModel]> deviceCTItems : [
+        //{text: "DTCT-0001"},
+        //{text: "DTCT-0006"},
+        
+    ];
+    in-out property<[ItemModel]> deviceCHItems;
+    //ItemModel
+    in-out property<[ItemModel]> portItems :[
+        /*{
+            text: "COM9"
+        },
+        {
+            text: "COM3"
+        },
+        {
+            text: "COM6"
+        }*/
+    ];
+    pure callback  refresh_deveice() ;//_refresh_button
+    pure callback  refresh_port() ;//_refresh_port_button
+    pure callback  connect_port(string) ;//_connect_current_button
+    pure callback  disconnect_port() ;//_connect_current_button
+    pure callback  connect_auto() ;//_connect_auto_button
+    pure callback  disconnect_auto() ;//_connect_auto_button
+    pure callback  open_device() ;
+    pure callback  deviceChangeCH(int , string) ;//int : 0/1 CT/CH int :index string:name
+    pure callback  deviceChangeCT(int , string) ;
+    //public function show_popupN(strNow: string){
+    //    SideBar.show_popup(strNow);
+    //}
+    public function change_ct(nowString:string){
+        LeftSideBarAdapter.deviceCT = nowString;
+        CT_mainPageAdapter.name = nowString;
+    }
+    
+    
+}
+
+
+export component SideBar inherits Rectangle {
+    clip:true;
+    in property<[string]> model: [];
+    in property<[string]> iconList:[];
+    out property<int> current-item: 0;
+    in property<string> title <=> label.text;
+    in-out property<bool> connectState : LeftSideBarAdapter.connectState;
+    in-out property<bool> ifConnecting :LeftSideBarAdapter.ifConnecting;
+    out property<int> current-focused: fs.has-focus ? fs.focused-tab : -1; // The currently focused tab
+    //callback refresh_deveice;
+    in-out property<bool> popupState : true;
+    in-out property<string> popupString ;
+    public function show_popup(strNow: string){
+        popupString = strNow;
+        popupState = true;
+        _popup_error.show();
+    }
+    width: 180px;
+
+    forward-focus: fs;
+
+    accessible-role: tab;
+    accessible-delegate-focus: root.current-focused >= 0 ? root.current-focused : root.current-item;
+    
+    Rectangle {  
+        background: Theme.palette.custom-tab-background;
+        
+          
+        fs := FocusScope {
+            x:0;
+            width: 0px; // Do not react on clicks
+            property<int> focused-tab: 0;
+    
+            key-pressed(event) => {
+                if (event.text == "\n") {
+                     root.current-item = root.current-focused;
+                     return accept;
+                }
+                if (event.text == Key.UpArrow) {
+                     self.focused-tab = Math.max(self.focused-tab - 1,  0);
+                     return accept;
+                }
+                if (event.text == Key.DownArrow) {
+                     self.focused-tab = Math.min(self.focused-tab + 1, root.model.length - 1);
+                     return accept;
+                }
+                return reject;
+            }
+    
+            key-released(event) => {
+                if (event.text == " ") {
+                     root.current-item = root.current-focused;
+                     return accept;
+                }
+                return reject;
+            }
+        }
+    }
+   
+    VerticalLayout {      
+        padding-top: StyleMetrics.layout-padding;
+        padding-bottom: StyleMetrics.layout-padding;
+        spacing: StyleMetrics.layout-spacing;
+        //alignment: start;
+        layout1:= VerticalLayout{
+            alignment: start;
+            //max-height: root.height/3;
+            height:(root.model.length + 1)*40px;
+            Image{
+                width: parent.width/3;
+                x : (parent.width - self.width) / 2;
+                source: Theme.images.logo_ic;
+            }
+            label := Text {
+                font-size: 20px;
+                horizontal-alignment: center;
+            }
+            
+                navigation := VerticalLayout { //中部
+                    alignment: start;//上方显示
+                    vertical-stretch: 0; 
+                    for item[index] in root.model : SideBarItem {
+                        has-focus: index == root.current-focused;
+                        text: item;
+                        selected: index == root.current-item;
+                        iconNow: root.iconList[index];
+                        clicked => { root.current-item = index; }
+                    }
+    
+    
+                }
+            
+            
+            VerticalLayout {  
+                bottom := VerticalLayout {  
+                    padding-left: StyleMetrics.layout-padding;
+                    padding-right: StyleMetrics.layout-padding;
+    
+                    
+                 }
+            }
+            
+        }
+        
+        //spaceNow:=Rectangle{
+            //height: root.height - layout1.height -bottomLay.height ;//中间空白
+        //    background:Theme.palette.white;
+        //}
+        _middle_layout:=VerticalLayout{
+            alignment: stretch;
+            //height:100%;
+            GridLayout{
+                
+                _middle_side_area:=Rectangle {
+
+                    width:parent.width;
+                    col:1;
+                    background: Theme.palette.custom-tab-background.darker(5%);
+                    border-radius: root.width /8;
+                    border-width: 1px;
+                    border-color: self.background.darker(10%) ;
+                    Rectangle{
+                        width:parent.width/10 * 9;
+                        height:parent.height/10 * 9;
+                        VerticalLayout{
+                            padding: Theme.spaces.small;
+                            spacing: Theme.spaces.small;
+                            HorizontalLayout{
+                                spacing: Theme.spaces.small;
+                                alignment: center;
+                                SmallTitle{
+                                    text:"Device List";
+                                }
+                                Icon{
+                                    text:root.connectState?  Icons.fa_var_link : Icons.fa_var_unlink;
+                                    width: Theme.sizes.small;
+                                    color:root.connectState? Theme.palette.dark-green : Theme.palette.dark-red;
+                                }
+                                _refresh_button:=custom_roundButton_textIcon{
+                                    //width:20px;
+                                    width: Theme.sizes.small;
+                                    icon:Icons.fa_var_refresh;
+                                    clicked => {
+                                        if(root.connectState){
+                                            //root.connectState = false;
+                                            //_left_sideBar.expaned = !_left_sideBar.expaned;
+                                            //root.refresh_deveice();
+                                            LeftSideBarAdapter.refresh_deveice();
+                                        }
+                                        else{//若没链接则打开侧边链接页面
+                                            //root.connectState = true;
+                                            _left_side_button.checked = true;
+                                            _left_sideBar.expaned = !_left_sideBar.expaned;
+                                        }
+                                        
+                                    }
+                                }
+                            }
+                            HorizontalSeparator{ 
+                                width:_key_setting_area.width/10 * 8;
+                                background:Theme.palette.foreground;
+                            }
+                            _device_list:=custom_listView {
+                                in-out property<bool> CT_empty: false;
+                                in-out property<bool> CH_empty: false;
+                                current_item <=> LeftSideBarAdapter.current_item;
+                                property <GroupItemModel> list_one: {
+                                    text: CT_empty? "DTCT Series [empty]" : "DTCT Series",
+                                    items: LeftSideBarAdapter.deviceCTItems
+                                };
+                                property <GroupItemModel> list_two: {
+                                    text: CT_empty?"DTCH Series [empty] ":"DTCH Series",
+                                    items: LeftSideBarAdapter.deviceCHItems
+                                };
+                                model: [self.list_one, self.list_two];
+                                current_item_changed(item)=>{
+                                    //debug(item.parent);
+                                    //debug(item.item);
+                                    debug(self.model[item.parent].items[item.item].text);
+                                    if(item.parent ==1)
+                                    {
+                                        LeftSideBarAdapter.deviceCH = self.model[item.parent].items[item.item].text;
+                                        LeftSideBarAdapter.deviceChangeCH(item.item,self.model[item.parent].items[item.item].text);
+                                    }
+                                    else{
+                                        LeftSideBarAdapter.change_ct(self.model[item.parent].items[item.item].text);
+                                        //  LeftSideBarAdapter.deviceCT = self.model[item.parent].items[item.item].text;
+                                        LeftSideBarAdapter.deviceChangeCT(item.item,self.model[item.parent].items[item.item].text);
+                                    }
+                                }
+                            }
+                        }
+                        //Manual selection
+                        
+                        @children
+                    }
+                    
+                }
+                _left_sideBar := sideBar_left{
+                    //width:0px;
+                    _popup_error := custom_popup{
+                        //x: parent.width/2;
+                        //y: _connect_current_button.y - 40px - Theme.spaces.small;
+                        y: parent.width/2;
+                        //width: _connect_current_button.width;
+                        //height: 60px;
+                        
+                        layout := VerticalLayout {  
+                            HorizontalLayout{
+                                alignment: center;
+                                padding: Theme.spaces.medium;
+                                Icon{
+                                    text:Icons.fa_var_bell_ringing;
+                                    font_size: Theme.icon.size.large;
+                                    color:Theme.palette.dark-red;
+                                }
+                            }
+                            HorizontalLayout{
+                                alignment: center;
+                                HorizontalSpacerSmall{}
+                                _txt_now:=Text {
+                                    font_size: 14px;
+                                    //font_weight: 400;
+                                    text: root.popupString;// "Please connect port ";
+                                    color:Theme.palette.dark-red;
+                                }
+                                HorizontalSpacerSmall{}
+                            }
+                            
+                            HorizontalLayout{
+                                alignment: center;
+                                Button{
+                                    //height:parent.height/2;
+                                    //40px
+                                    //width:parent.width/3;
+                                    text:"OK";
+                                }
+                            }
+                            }
+                            
+                    }  
+                    col:0;
+                    reference-width:root.width *2;
+                    border-radius: root.width /16;
+                    border-width: 1px;
+                    border-color: self.background.darker(10%) ;
+                    background: _left_side_button.checked ? Theme.palette.custom-tab-background.darker(0.2) : Theme.palette.custom-tab-background;
+                    animate background {
+                        //delay:Theme.durations.slow;
+                        duration: Theme.durations.slow*2;
+                        
+                    }
+                    
+                    
+                    _key_setting_area:=VerticalLayout{
+                        //alignment: start;
+                        height:100%;
+                        max-width:parent.width/10 * 8;
+                        max-height:parent.height/10 * 8;
+                        padding: Theme.spaces.large;
+                        spacing: Theme.spaces.medium;
+                        HorizontalLayout{
+                            alignment: center;
+                            SmallTitle{
+                                text:"Key Settings";
+                            }
+                        }
+                        //Spacer{}
+                        HorizontalSeparator{
+                            width:_key_setting_area.width/10 * 8;
+                        }
+                        //Spacer{}
+                        
+                        MediumLabel{
+                            text:"Manual selection";
+                            
+                        }
+                        HorizontalLayout{
+                            spacing: Theme.spaces.small;
+                            alignment:center;
+                            _port_comboBox:=ComboBox {
+                            
+                                enabled: true;
+                                current_index: 0;
+                                model: LeftSideBarAdapter.portItems;
+                            }
+                            _refresh_port_button:=RoundButton{
+                                icon: Icons.fa_var_refresh;
+                                icon_background: _left_sideBar.background;
+                                clicked=>{
+                                    LeftSideBarAdapter.refresh_port();
+                                }
+                            }
+                        }
+                        HorizontalLayout{
+                            alignment: center;
+                            _connect_current_button:=Button {
+                                primary: false;
+                                text:root.connectState? "Diconnect Current": "Connect Current";
+                                icon:root.connectState?  Icons.fa_var_unlink : Icons.fa_var_link;
+                                clicked=>{
+                                    if(root.connectState){
+                                        LeftSideBarAdapter.disconnect_port();
+                                        LeftSideBarAdapter.connectState = false;
+                                    }
+                                    else{
+                                        if(_port_comboBox.current_index >= 0 && _port_comboBox.current_index < _port_comboBox.model.length)
+                                        {
+                                            LeftSideBarAdapter.ifConnecting = true;
+                                            debug(_port_comboBox.model[_port_comboBox.current_index ].text);
+                                            LeftSideBarAdapter.connect_port(_port_comboBox.model[_port_comboBox.current_index ].text);
+                                        }
+                                        else{
+                                            root.popupString =  "Please connect port first!";
+                                            _popup_error.show();
+                                            //debug("port index error"); 
+                                        }
+                                    }
+                                }
+                                    //root.ifConnecting = !root.ifConnecting;
+                                    //_device_list.list_one_empty = false;
+                                    
+                            }
+                        }
+                        
+                        HorizontalSeparator{
+                            width:_key_setting_area.width/10 * 8;
+                            
+                        }
+                        MediumLabel{
+                            text:"Automatic  selection";
+                            
+                        }
+                        HorizontalLayout{
+                            alignment: center;
+                            _connect_auto_button:=Button {
+                                primary: false;
+                                text:root.connectState? "Click to Diconnect": "Click to Connect";
+                                icon:root.connectState?  Icons.fa_var_unlink : Icons.fa_var_link;
+                                clicked=>{
+                                    //root.ifConnecting = !root.ifConnecting;
+                                    if(! root.connectState){
+                                        LeftSideBarAdapter.ifConnecting = true;
+                                        LeftSideBarAdapter.connect_auto();
+                                    }
+                                    else{
+                                        LeftSideBarAdapter.disconnect_auto();
+                                        LeftSideBarAdapter.connectState = false;
+                                    }
+                                    //_device_list.list_one_empty = false;
+                                    
+                                }
+                            }
+                            
+                        }
+                        
+                        HorizontalSeparator{
+                            width:_key_setting_area.width/10 * 8;
+                            
+                        }
+                        MediumLabel{
+                            text:"Connection Status";
+                        }
+                        _connecting_lay:=HorizontalLayout{
+                            alignment: center;
+                            in-out property<brush> currentColor:black;
+                            Spacer{}
+                            if(ifConnecting==true):
+                            HorizontalLayout{
+                                property<brush> currentColor:black;
+                                _icon1:=Icon{
+                                    text:Icons.fa_var_bicycle;
+                                    color:black;
+                                    
+                                }
+                                   _label1:= MediumLabel{
+                                        text:"Connecting...";
+                                        //color:black;
+                                        color:black;
+                                        
+                                }
+                            }
+                            
+                                if(ifConnecting==false):HorizontalLayout{
+                                    MediumLabel{
+                                        text:root.connectState? "Connected":"Disconnected";
+                                        color:root.connectState? Theme.palette.dark-green : Theme.palette.dark-red;
+                                    }
+                                    
+                                    Icon{
+                                        text:root.connectState?  Icons.fa_var_link : Icons.fa_var_unlink;
+                                        width: 60px;
+                                        color:root.connectState? Theme.palette.dark-green : Theme.palette.dark-red;
+                                    }
+                                
+                                } 
+                                Spacer{}
+                            
+                        
+                        }
+                        
+                        HorizontalSeparator{
+                            width:_key_setting_area.width/10 * 8;
+                            
+                        }
+
+                        
+                    }
+                
+                    
+                    
+                }
+            }
+        }
+        bottomLay:=VerticalLayout{
+            //alignment: end;//下方显示
+            HorizontalLayout{ 
+                alignment: center;
+                spacing:2px;
+                /*
+                i_popup := custom_popup{
+                    x: i_popup_button.x;
+                    y: i_popup_button.y - 40px - Theme.spaces.small;
+                    width: i_popup_button.width;
+                    height: 40px;
+                    
+                    layout := VerticalLayout {  
+                        padding: Theme.spaces.medium;
+                        Text {
+                            font_size: 12px;
+                            //font_weight: 400;
+                            text: "Popup content";
+                        }
+                    }
+                }  */   
+                custom_toolButton{
+                    width: parent.width/2 - 5px;
+                    height: 50px;
+                    text: "Home";
+                    icon: Theme.images.homeIcon;
+                    clicked => {
+                        debug(parent.y);
+                        current-item = 0;
+                        LeftSideBarAdapter.connectState = !LeftSideBarAdapter.connectState;
+                    }
+                } 
+                _left_side_button:=custom_toolButton{
+                    width: parent.width/2- 5px;
+                    height: 50px;
+                    text: "KeySetting";
+                    icon: Theme.images.keyIcon;
+                    checkable: true;
+                    clicked => {
+                        _left_sideBar.expaned = !_left_sideBar.expaned;
+                        
+                    }
+                } 
+            }
+        }
+        
+         
+    }
+    
+    
+}

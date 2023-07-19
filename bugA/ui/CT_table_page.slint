@@ -1,0 +1,120 @@
+import {Theme,Icons,Icon} from "ui/theme.slint";
+import { Page } from "page.slint";
+import {Spacer ,HorizontalSpacerSmall, HorizontalSeparator,HorizontalSpacerLarge} from "ui/custom_widgets/custom_spacer.slint";
+import {Button ,RoundOutlineButton,RoundButton}from "ui/custom_widgets/custom_button.slint";
+import {MediumTitle,SmallTitle,SmallLabel,MediumLabel} from "ui/custom_widgets/custom_label.slint";
+import {TableView, Cell} from "ui/custom_widgets/custom_tableView.slint";
+import {PlotterPage,PlotArea} from "ui/plotter.slint";
+import {custom_tableViewPaging } from "ui/custom_widgets/custom_tableViewPaging.slint";
+import {CT_mainPageAdapter} from "ui/CT_main_page.slint";
+//import {CT_mainPageAdapter} from "./ui/CT_main_page.slint";
+
+export component CT_tablePage inherits Page {
+    connectState : CT_mainPageAdapter.currentConnect;
+    public function refresh() {
+        _table.currentPageRows = CT_mainPageAdapter.getPageData();
+        debug("refresh");
+    }
+    title:"Table View";
+    //preferred-width: 800px;
+    //preferred-height: 400px;
+    //in-out property <image> previewPlot <=>_plot_preview.source;
+    background:Theme.palette.custom-page-background;
+    VerticalLayout{
+        //alignment:start;
+        VerticalLayout{
+            alignment:start;
+            _basic_data:=GridLayout{
+                padding: Theme.spaces.large;
+                spacing: Theme.spaces.medium;
+                Row{
+                    SmallLabel{
+                        text: "Name";
+                        color: Theme.palette.foreground_disabled;
+                    }
+                    Spacer{}
+                    SmallLabel{
+                        text: "Version";
+                        color: Theme.palette.foreground_disabled;
+                    }
+                    Spacer{}
+                    SmallLabel{
+                        text: "Current Record Time";
+                        color: Theme.palette.foreground_disabled;
+                    }
+                    Spacer{}
+                    SmallLabel{
+                        text: "Current Data Count";
+                        color: Theme.palette.foreground_disabled;
+                    }
+                    Spacer{}
+                }
+                Row {
+                    HorizontalSeparator {
+                        colspan: 8; 
+                        background: Theme.palette.foreground_disabled;
+                    }
+                }
+                Row{
+                    MediumLabel{
+                        text <=> CT_mainPageAdapter.name;
+                    }
+                    Spacer{}
+                    MediumLabel{
+                        text <=> CT_mainPageAdapter._type;
+                    }
+                    Spacer{}
+                    MediumLabel{
+                        text <=> CT_mainPageAdapter.currentTime;
+                    }
+                    Spacer{}
+                    MediumLabel{
+                        text : CT_mainPageAdapter.tableDataNum;
+                    }
+                    Spacer{}
+                }
+            }
+        }
+
+        VerticalLayout{
+    
+            padding: Theme.spaces.large;
+            spacing: Theme.spaces.medium;    
+            MediumTitle {
+                text: "Data Table";
+            }
+            HorizontalSeparator {
+                //colspan: 8; 
+                background: Theme.palette.foreground_disabled;
+                
+            }
+        _table := custom_tableViewPaging {
+            //min-height:root.height/4;
+            eachPageDataNum:CT_mainPageAdapter.eachPageDataNum;
+            background: Theme.palette.custom-tab-background;
+            border-radius: 5px;
+            border-width: 1px;
+            border-color: self.background.darker(10%) ;
+            currentPageRows : CT_mainPageAdapter.getPageData();
+            totalLength : CT_mainPageAdapter.tableDataNum;
+            private property <int> current_row: -1;
+            accepted(row, cell, text) => {
+                self.rows[self.row][cell].editable = false;
+                self.rows[self.row][cell].value = text;
+                self.current_row = -1;
+            }
+            onCurrentPageChanged(fir,las)=>{
+                CT_mainPageAdapter.onTablePageChanged(fir,las); 
+            }
+            columns: [
+                { header: "Index", min_width: 35px },
+                { header: "| Time", horizontal_stretch: 1,min_width: 100px },
+                { header: "| Temprature", horizontal_stretch: 1,min_width: 35px },
+            ];
+            refresh=>{
+            }
+            //rows: CT_mainPageAdapter.tableData;
+        }
+        }
+    }
+}
